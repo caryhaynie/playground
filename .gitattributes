@@ -1,0 +1,3 @@
+*.meta text eol=lf
+*.prefab text eol=lf
+*.scene text eol=lf

@@ -70,12 +70,21 @@ namespace FourEx
             HexCell cell = m_Cells[i] = Instantiate<HexCell>(m_CellPrefab);
             cell.transform.SetParent(transform, false);
             cell.transform.localPosition = position;
+            cell.coordinates = HexCoordinates.FromOffsetCoordinates(x, z);
 
             Text label = Instantiate<Text>(m_CellLabelPrefab);
             label.rectTransform.SetParent(m_GridCanvas.transform, false);
             label.rectTransform.anchoredPosition =
                 new Vector2(position.x, position.z);
-            label.text = string.Format("{0}\n{1}", x, z);
+            label.text = cell.coordinates.ToStringOnSeparateLines();
+        }
+
+        void HandleInput()
+        {
+            var inputRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
+            if (Physics.Raycast(inputRay, out hit))
+                TouchCell(hit.point);
         }
 
         void Reset()
@@ -88,6 +97,19 @@ namespace FourEx
         void Start()
         {
             m_GridMesh.Triangulate(m_Cells);
+        }
+
+        void TouchCell(Vector3 position)
+        {
+            position = transform.InverseTransformPoint(position);
+            var coordinates = HexCoordinates.FromPosition(position);
+            Debug.LogFormat("touched at {0}", coordinates);
+        }
+
+        void Update()
+        {
+            if (Input.GetMouseButton(0))
+                HandleInput();
         }
     }
 }

@@ -7,6 +7,7 @@ namespace FourEx
     public class HexMesh : MonoBehaviour
     {
         Mesh m_HexMesh;
+        MeshCollider m_MeshCollider;
         List<Vector3> m_Vertices;
         List<int> m_Triangles;
 
@@ -30,6 +31,7 @@ namespace FourEx
             m_HexMesh.name = "Hex Mesh";
             m_Vertices = new List<Vector3>();
             m_Triangles = new List<int>();
+            m_MeshCollider = gameObject.AddComponent<MeshCollider>();
         }
 
         public void Triangulate(HexCell[] cells)
@@ -44,6 +46,7 @@ namespace FourEx
             m_HexMesh.vertices = m_Vertices.ToArray();
             m_HexMesh.triangles = m_Triangles.ToArray();
             m_HexMesh.RecalculateNormals();
+            m_MeshCollider.sharedMesh = m_HexMesh;
         }
 
         void Triangulate(HexCell cell)
