@@ -7,13 +7,12 @@ namespace FourEx
     {
         [SerializeField]
         private int m_Height;
-
         [SerializeField]
         private int m_Width;
-
+        [SerializeField]
+        private Color m_DefaultColor = Color.white;
         [SerializeField]
         private HexCell m_CellPrefab;
-
         [SerializeField]
         private Text m_CellLabelPrefab;
 
@@ -26,19 +25,21 @@ namespace FourEx
             get { return m_Height; }
             //set { m_Height = value; }
         }
-
         public int width
         {
             get { return m_Width; }
             //set { m_Width = value; }
         }
-
+        public Color defaultColor
+        {
+            get { return m_DefaultColor; }
+            set { m_DefaultColor = value; }
+        }
         public HexCell CellPrefab
         {
             get { return m_CellPrefab; }
             //set { m_CellPrefab = value; }
         }
-
         public Text cellLabelPrefab
         {
             get { return m_CellLabelPrefab; }
@@ -71,6 +72,7 @@ namespace FourEx
             cell.transform.SetParent(transform, false);
             cell.transform.localPosition = position;
             cell.coordinates = HexCoordinates.FromOffsetCoordinates(x, z);
+            cell.color = defaultColor;
 
             Text label = Instantiate<Text>(m_CellLabelPrefab);
             label.rectTransform.SetParent(m_GridCanvas.transform, false);
@@ -79,19 +81,12 @@ namespace FourEx
             label.text = cell.coordinates.ToStringOnSeparateLines();
         }
 
-        void HandleInput()
-        {
-            var inputRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
-            if (Physics.Raycast(inputRay, out hit))
-                TouchCell(hit.point);
-        }
-
         void Reset()
         {
             m_Height = 6;
             m_Width = 6;
             m_CellPrefab = null;
+            m_CellLabelPrefab = null;
         }
 
         void Start()
@@ -99,17 +94,15 @@ namespace FourEx
             m_GridMesh.Triangulate(m_Cells);
         }
 
-        void TouchCell(Vector3 position)
+        public void TouchCell(Vector3 position, Color color)
         {
             position = transform.InverseTransformPoint(position);
             var coordinates = HexCoordinates.FromPosition(position);
             Debug.LogFormat("touched at {0}", coordinates);
-        }
-
-        void Update()
-        {
-            if (Input.GetMouseButton(0))
-                HandleInput();
+            int index = coordinates.x + coordinates.z * width + coordinates.z / 2;
+            var cell = m_Cells[index];
+            cell.color = color;
+            m_GridMesh.Triangulate(m_Cells);
         }
     }
 }

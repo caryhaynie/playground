@@ -10,6 +10,7 @@ namespace FourEx
         MeshCollider m_MeshCollider;
         List<Vector3> m_Vertices;
         List<int> m_Triangles;
+        List<Color> m_Colors;
 
         void AddTriangle(Vector3 v1, Vector3 v2, Vector3 v3)
         {
@@ -31,6 +32,7 @@ namespace FourEx
             m_HexMesh.name = "Hex Mesh";
             m_Vertices = new List<Vector3>();
             m_Triangles = new List<int>();
+            m_Colors = new List<Color>();
             m_MeshCollider = gameObject.AddComponent<MeshCollider>();
         }
 
@@ -39,14 +41,23 @@ namespace FourEx
             m_HexMesh.Clear();
             m_Vertices.Clear();
             m_Triangles.Clear();
+            m_Colors.Clear();
             for (int i = 0; i < cells.Length; i++)
             {
                 Triangulate(cells[i]);
             }
             m_HexMesh.vertices = m_Vertices.ToArray();
+            m_HexMesh.colors = m_Colors.ToArray();
             m_HexMesh.triangles = m_Triangles.ToArray();
             m_HexMesh.RecalculateNormals();
             m_MeshCollider.sharedMesh = m_HexMesh;
+        }
+
+        void AddTriangleColor(Color color)
+        {
+            m_Colors.Add(color);
+            m_Colors.Add(color);
+            m_Colors.Add(color);
         }
 
         void Triangulate(HexCell cell)
@@ -61,6 +72,7 @@ namespace FourEx
                     center + HexMetrics.corners[c1],
                     center + HexMetrics.corners[c2]
                 );
+                AddTriangleColor(cell.color);
             }
         }
     }
