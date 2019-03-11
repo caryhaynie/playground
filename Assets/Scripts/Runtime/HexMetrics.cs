@@ -42,7 +42,7 @@ namespace FourEx
 
         public static Vector3 GetBridge(HexDirection d)
         {
-            return (GetFirstCorner(d) + GetSecondCorner(d)) * 0.5f * blendFactor;
+            return (GetFirstCorner(d) + GetSecondCorner(d)) * blendFactor;
         }
     }
 }

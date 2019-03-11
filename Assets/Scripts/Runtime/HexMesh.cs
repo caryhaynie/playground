@@ -82,27 +82,35 @@ namespace FourEx
             AddTriangle(center, v1, v2);
             AddTriangleColor(cell.color);
 
+            if (direction <= HexDirection.SE)
+                TriangulateConnection(direction, cell, v1, v2);
+        }
+
+        void TriangulateConnection(HexDirection direction, HexCell cell, Vector3 v1, Vector3 v2)
+        {
+            var neighbor = cell.GetNeighbor(direction);
+            if (neighbor == null)
+                return;
+
             var bridge = HexMetrics.GetBridge(direction);
             var v3 = v1 + bridge;
             var v4 = v2 + bridge;
 
             AddQuad(v1, v2, v3, v4);
 
-            var prevNeighbor = cell.GetNeighbor(direction.Previous()) ?? cell;
-            var neighbor = cell.GetNeighbor(direction) ?? cell;
-            var nextNeighbor = cell.GetNeighbor(direction.Next()) ?? cell;
+            AddQuadColor(cell.color, neighbor.color);
 
-            var bridgeColor = (cell.color + neighbor.color) / 2f;
-            var prevColor = (cell.color + prevNeighbor.color + neighbor.color) / 3f;
-            var nextColor = (cell.color + neighbor.color + nextNeighbor.color) / 3f;
+            //var prevNeighbor = cell.GetNeighbor(direction.Previous()) ?? cell;
+            //var prevColor = (cell.color + prevNeighbor.color + neighbor.color) / 3f;
+            //AddTriangle(v1, center + HexMetrics.GetFirstCorner(direction), v3);
+            //AddTriangleColor(cell.color, prevColor, bridgeColor);
 
-            AddQuadColor(cell.color, bridgeColor);
-
-            AddTriangle(v1, center + HexMetrics.GetFirstCorner(direction), v3);
-            AddTriangleColor(cell.color, prevColor, bridgeColor);
-
-            AddTriangle(v2, v4, center + HexMetrics.GetSecondCorner(direction));
-            AddTriangleColor(cell.color, bridgeColor, nextColor);
+            var nextNeighbor = cell.GetNeighbor(direction.Next());
+            if (direction <= HexDirection.E && nextNeighbor != null)
+            {
+                AddTriangle(v2, v4, v2 + HexMetrics.GetBridge(direction.Next()));
+                AddTriangleColor(cell.color, neighbor.color, nextNeighbor.color);
+            }
         }
 
         void AddQuad(Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4)
