@@ -55,25 +55,81 @@ namespace FourEx
 
         void AddTriangleColor(Color color)
         {
-            m_Colors.Add(color);
-            m_Colors.Add(color);
-            m_Colors.Add(color);
+            AddTriangleColor(color, color, color);
+        }
+
+        void AddTriangleColor(Color c1, Color c2, Color c3)
+        {
+            m_Colors.Add(c1);
+            m_Colors.Add(c2);
+            m_Colors.Add(c3);
         }
 
         void Triangulate(HexCell cell)
         {
-            var center = cell.transform.localPosition;
-            for (int i = 0; i < 6; i++)
+            for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++)
             {
-                var c1 = i;
-                var c2 = (i + 1) % (HexMetrics.corners.Length);
-                AddTriangle(
-                    center,
-                    center + HexMetrics.corners[c1],
-                    center + HexMetrics.corners[c2]
-                );
-                AddTriangleColor(cell.color);
+                Triangulate(d, cell);
             }
+        }
+
+        void Triangulate(HexDirection direction, HexCell cell)
+        {
+            var center = cell.transform.localPosition;
+            var v1 = center + HexMetrics.GetFirstSolidCorner(direction);
+            var v2 = center + HexMetrics.GetSecondSolidCorner(direction);
+
+            AddTriangle(center, v1, v2);
+            AddTriangleColor(cell.color);
+
+            var bridge = HexMetrics.GetBridge(direction);
+            var v3 = v1 + bridge;
+            var v4 = v2 + bridge;
+
+            AddQuad(v1, v2, v3, v4);
+
+            var prevNeighbor = cell.GetNeighbor(direction.Previous()) ?? cell;
+            var neighbor = cell.GetNeighbor(direction) ?? cell;
+            var nextNeighbor = cell.GetNeighbor(direction.Next()) ?? cell;
+
+            var bridgeColor = (cell.color + neighbor.color) / 2f;
+            var prevColor = (cell.color + prevNeighbor.color + neighbor.color) / 3f;
+            var nextColor = (cell.color + neighbor.color + nextNeighbor.color) / 3f;
+
+            AddQuadColor(cell.color, bridgeColor);
+
+            AddTriangle(v1, center + HexMetrics.GetFirstCorner(direction), v3);
+            AddTriangleColor(cell.color, prevColor, bridgeColor);
+
+            AddTriangle(v2, v4, center + HexMetrics.GetSecondCorner(direction));
+            AddTriangleColor(cell.color, bridgeColor, nextColor);
+        }
+
+        void AddQuad(Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4)
+        {
+            var index = m_Vertices.Count;
+            m_Vertices.Add(v1);
+            m_Vertices.Add(v2);
+            m_Vertices.Add(v3);
+            m_Vertices.Add(v4);
+            m_Triangles.Add(index); // v1
+            m_Triangles.Add(index + 2); // v3
+            m_Triangles.Add(index + 1); // v2
+            m_Triangles.Add(index + 1); // v2
+            m_Triangles.Add(index + 2); // v3
+            m_Triangles.Add(index + 3); // v4
+        }
+
+        void AddQuadColor(Color c1, Color c2)
+        {
+            AddQuadColor(c1, c1, c2, c2);
+        }
+        void AddQuadColor(Color c1, Color c2, Color c3, Color c4)
+        {
+            m_Colors.Add(c1);
+            m_Colors.Add(c2);
+            m_Colors.Add(c3);
+            m_Colors.Add(c4);
         }
     }
 }

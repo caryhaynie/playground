@@ -47,3 +47,10 @@ MonoBehaviour:
     m_X: 0
     m_Z: 0
   color: {r: 0, g: 0, b: 0, a: 0}
+  m_Neighbors:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}

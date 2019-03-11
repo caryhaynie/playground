@@ -74,6 +74,30 @@ namespace FourEx
             cell.coordinates = HexCoordinates.FromOffsetCoordinates(x, z);
             cell.color = defaultColor;
 
+            if (x > 0)
+            {
+                cell.SetNeighbor(HexDirection.W, m_Cells[i - 1]);
+            }
+            if (z > 0)
+            {
+                if ((z & 1) == 0)
+                {
+                    cell.SetNeighbor(HexDirection.SE, m_Cells[i - width]);
+                    if (x > 0)
+                    {
+                        cell.SetNeighbor(HexDirection.SW, m_Cells[i - width - 1]);
+                    }
+                }
+                else
+                {
+                    cell.SetNeighbor(HexDirection.SW, m_Cells[i - width]);
+                    if (x < width - 1)
+                    {
+                        cell.SetNeighbor(HexDirection.SE, m_Cells[i - width + 1]);
+                    }
+                }
+            }
+
             Text label = Instantiate<Text>(m_CellLabelPrefab);
             label.rectTransform.SetParent(m_GridCanvas.transform, false);
             label.rectTransform.anchoredPosition =
