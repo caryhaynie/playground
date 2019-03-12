@@ -6,6 +6,7 @@ namespace FourEx
     public class HexMapEditor : MonoBehaviour
     {
         private Color m_ActiveColor;
+        private int m_ActiveElevation;
         [SerializeField]
         private HexGrid m_HexGrid;
         [SerializeField]
@@ -31,12 +32,24 @@ namespace FourEx
             var inputRay = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
             if (Physics.Raycast(inputRay, out hit))
-                m_HexGrid.TouchCell(hit.point, m_ActiveColor);
+                EditCell(m_HexGrid.GetCell(hit.point));
+        }
+
+        void EditCell(HexCell cell)
+        {
+            cell.color = m_ActiveColor;
+            cell.elevation = m_ActiveElevation;
+            m_HexGrid.Refresh();
         }
 
         public void SelectColor(int index)
         {
             m_ActiveColor = m_Colors[index];
+        }
+
+        public void SetElevation(float elevation)
+        {
+            m_ActiveElevation = (int)elevation;
         }
 
         void Update()

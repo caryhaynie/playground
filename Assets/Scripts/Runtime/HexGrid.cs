@@ -103,6 +103,8 @@ namespace FourEx
             label.rectTransform.anchoredPosition =
                 new Vector2(position.x, position.z);
             label.text = cell.coordinates.ToStringOnSeparateLines();
+
+            cell.uiRect = label.rectTransform;
         }
 
         void Reset()
@@ -118,14 +120,17 @@ namespace FourEx
             m_GridMesh.Triangulate(m_Cells);
         }
 
-        public void TouchCell(Vector3 position, Color color)
+        public HexCell GetCell(Vector3 position)
         {
             position = transform.InverseTransformPoint(position);
             var coordinates = HexCoordinates.FromPosition(position);
-            Debug.LogFormat("touched at {0}", coordinates);
+            //Debug.LogFormat("touched at {0}", coordinates);
             int index = coordinates.x + coordinates.z * width + coordinates.z / 2;
-            var cell = m_Cells[index];
-            cell.color = color;
+            return m_Cells[index];
+        }
+
+        public void Refresh()
+        {
             m_GridMesh.Triangulate(m_Cells);
         }
     }
