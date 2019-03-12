@@ -74,6 +74,7 @@ namespace FourEx
             cell.coordinates = HexCoordinates.FromOffsetCoordinates(x, z);
             cell.color = defaultColor;
 
+
             if (x > 0)
             {
                 cell.SetNeighbor(HexDirection.W, m_Cells[i - 1]);

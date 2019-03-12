@@ -95,6 +95,7 @@ namespace FourEx
             var bridge = HexMetrics.GetBridge(direction);
             var v3 = v1 + bridge;
             var v4 = v2 + bridge;
+            v3.y = v4.y = neighbor.elevation * HexMetrics.elevationStep;
 
             AddQuad(v1, v2, v3, v4);
 
@@ -104,11 +105,13 @@ namespace FourEx
             //var prevColor = (cell.color + prevNeighbor.color + neighbor.color) / 3f;
             //AddTriangle(v1, center + HexMetrics.GetFirstCorner(direction), v3);
             //AddTriangleColor(cell.color, prevColor, bridgeColor);
-
-            var nextNeighbor = cell.GetNeighbor(direction.Next());
+            var next_d = direction.Next();
+            var nextNeighbor = cell.GetNeighbor(next_d);
             if (direction <= HexDirection.E && nextNeighbor != null)
             {
-                AddTriangle(v2, v4, v2 + HexMetrics.GetBridge(direction.Next()));
+                var v5 = v2 + HexMetrics.GetBridge(next_d);
+                v5.y = nextNeighbor.elevation * HexMetrics.elevationStep;
+                AddTriangle(v2, v4, v5);
                 AddTriangleColor(cell.color, neighbor.color, nextNeighbor.color);
             }
         }
