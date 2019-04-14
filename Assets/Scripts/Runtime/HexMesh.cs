@@ -97,14 +97,14 @@ namespace FourEx
             var v4 = v2 + bridge;
             v3.y = v4.y = neighbor.elevation * HexMetrics.elevationStep;
 
-            AddQuad(v1, v2, v3, v4);
+            if (cell.GetEdgeType(direction) == HexEdgeType.Slope)
+                TriangulateEdgeTerraces(v1, v2, cell, v3, v4, neighbor);
+            else
+            {
+                AddQuad(v1, v2, v3, v4);
+                AddQuadColor(cell.color, neighbor.color);
+            }
 
-            AddQuadColor(cell.color, neighbor.color);
-
-            //var prevNeighbor = cell.GetNeighbor(direction.Previous()) ?? cell;
-            //var prevColor = (cell.color + prevNeighbor.color + neighbor.color) / 3f;
-            //AddTriangle(v1, center + HexMetrics.GetFirstCorner(direction), v3);
-            //AddTriangleColor(cell.color, prevColor, bridgeColor);
             var next_d = direction.Next();
             var nextNeighbor = cell.GetNeighbor(next_d);
             if (direction <= HexDirection.E && nextNeighbor != null)
@@ -114,6 +114,38 @@ namespace FourEx
                 AddTriangle(v2, v4, v5);
                 AddTriangleColor(cell.color, neighbor.color, nextNeighbor.color);
             }
+        }
+
+        void TriangulateEdgeTerraces(
+            Vector3 beginLeft, Vector3 beginRight, HexCell beginCell,
+            Vector3 endLeft, Vector3 endRight, HexCell endCell
+        )
+        {
+            Vector3 v3 = HexMetrics.TerraceLerp(beginLeft, endLeft, 1);
+            Vector3 v4 = HexMetrics.TerraceLerp(beginRight, endRight, 1);
+            Color c2 = HexMetrics.TerraceLerp(beginCell.color, endCell.color, 1);
+
+            // first step
+            AddQuad(beginLeft, beginRight, v3, v4);
+            AddQuadColor(beginCell.color, c2);
+
+            for (int i = 2; i < HexMetrics.terracedSteps; i++)
+            {
+                Vector3 v1 = v3;
+                Vector3 v2 = v4;
+                Color c1 = c2;
+
+                v3 = HexMetrics.TerraceLerp(beginLeft, endLeft, i);
+                v4 = HexMetrics.TerraceLerp(beginRight, endRight, i);
+                c2 = HexMetrics.TerraceLerp(beginCell.color, endCell.color, i);
+
+                AddQuad(v1, v2, v3, v4);
+                AddQuadColor(c1, c2);
+            }
+
+            // last step
+            AddQuad(v3, v4, endLeft, endRight);
+            AddQuadColor(c2, endCell.color);
         }
 
         void AddQuad(Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4)

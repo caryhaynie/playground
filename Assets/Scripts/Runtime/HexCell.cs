@@ -27,6 +27,11 @@ namespace FourEx
             }
         }
 
+        public HexEdgeType GetEdgeType(HexDirection direction)
+        {
+            return HexMetrics.GetEdgeType(elevation, GetNeighbor(direction).elevation);
+        }
+
         public HexCell GetNeighbor(HexDirection direction)
         {
             return m_Neighbors[(int)direction];
