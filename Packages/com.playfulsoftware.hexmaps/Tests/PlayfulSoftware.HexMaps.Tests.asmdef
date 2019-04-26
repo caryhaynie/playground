@@ -1,5 +1,5 @@
 {
-    "name": "FourEx.Tests",
+    "name": "PlayfulSoftware.HexMaps.Tests",
     "references": [],
     "optionalUnityReferences": [
         "TestAssemblies"
@@ -10,5 +10,6 @@
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,
-    "defineConstraints": []
+    "defineConstraints": [],
+    "versionDefines": []
 }

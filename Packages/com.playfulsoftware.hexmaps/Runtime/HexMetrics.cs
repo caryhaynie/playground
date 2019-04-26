@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace FourEx
+namespace PlayfulSoftware.HexMaps
 {
     public static class HexMetrics
     {

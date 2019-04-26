@@ -1,4 +1,4 @@
-namespace FourEx
+namespace PlayfulSoftware.HexMaps
 {
     public enum HexDirection
     {

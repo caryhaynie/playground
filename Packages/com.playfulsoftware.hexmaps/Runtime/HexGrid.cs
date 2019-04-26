@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-namespace FourEx
+namespace PlayfulSoftware.HexMaps
 {
     public class HexGrid : MonoBehaviour
     {
