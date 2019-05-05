@@ -15,10 +15,13 @@ namespace PlayfulSoftware.HexMaps
         private HexCell m_CellPrefab;
         [SerializeField]
         private Text m_CellLabelPrefab;
+        [SerializeField]
+        private Texture2D m_NoiseSource;
 
         private HexCell[] m_Cells;
         private Canvas m_GridCanvas;
         private HexMesh m_GridMesh;
+
 
         public int height
         {
@@ -46,8 +49,16 @@ namespace PlayfulSoftware.HexMaps
             set { m_CellLabelPrefab = value; }
         }
 
+        public Texture2D noiseSource
+        {
+            get { return m_NoiseSource; }
+            set { m_NoiseSource = value; }
+        }
+
         void Awake()
         {
+            HexMetrics.noiseSource = m_NoiseSource;
+
             m_GridCanvas = GetComponentInChildren<Canvas>();
             m_GridMesh = GetComponentInChildren<HexMesh>();
             m_Cells = new HexCell[height * width];
@@ -106,6 +117,12 @@ namespace PlayfulSoftware.HexMaps
             label.text = cell.coordinates.ToStringOnSeparateLines();
 
             cell.uiRect = label.rectTransform;
+            cell.elevation = 0;
+        }
+
+        void OnEnable()
+        {
+            HexMetrics.noiseSource = m_NoiseSource;
         }
 
         void Reset()

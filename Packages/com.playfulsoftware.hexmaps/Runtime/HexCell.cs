@@ -22,9 +22,25 @@ namespace PlayfulSoftware.HexMaps
             set
             {
                 m_Elevation = value;
-                UpdateTransform();
-                UpdateUITransform();
+
+                // Update Transform
+                var position = transform.localPosition;
+                position.y = m_Elevation * HexMetrics.elevationStep;
+                position.y +=
+                    (HexMetrics.SampleNoise(position).y * 2f - 1f) *
+                    HexMetrics.elevationPerturbStrength;
+                transform.localPosition = position;
+
+                // Update UI Transform
+                var uiPosition = uiRect.localPosition;
+                uiPosition.z = -position.y;
+                uiRect.localPosition = uiPosition;
             }
+        }
+
+        public Vector3 position
+        {
+            get { return transform.localPosition; }
         }
 
         public HexEdgeType GetEdgeType(HexCell otherCell)
@@ -46,20 +62,6 @@ namespace PlayfulSoftware.HexMaps
         {
             m_Neighbors[(int)direction] = cell;
             cell.m_Neighbors[(int)direction.Opposite()] = this;
-        }
-
-        private void UpdateTransform()
-        {
-            var position = transform.localPosition;
-            position.y = m_Elevation * HexMetrics.elevationStep;
-            transform.localPosition = position;
-        }
-
-        private void UpdateUITransform()
-        {
-            var position = uiRect.localPosition;
-            position.z = m_Elevation * -HexMetrics.elevationStep;
-            uiRect.localPosition = position;
         }
     }
 }
