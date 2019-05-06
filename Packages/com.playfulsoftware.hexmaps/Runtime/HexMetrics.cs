@@ -6,6 +6,7 @@ namespace PlayfulSoftware.HexMaps
     {
         public const float blendFactor = 1f - solidFactor;
         public const float cellPerturbStrength = 4f;
+        public const int chunkSizeX = 5, chunkSizeZ = 5;
         public const float elevationPerturbStrength = 1.5f;
         public const float elevationStep = 3f;
         public const float horizontalTerraceStepSize = 1f / terracedSteps;

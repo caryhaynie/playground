@@ -39,7 +39,6 @@ namespace PlayfulSoftware.HexMaps
         {
             cell.color = m_ActiveColor;
             cell.elevation = m_ActiveElevation;
-            m_HexGrid.Refresh();
         }
 
         public void SelectColor(int index)

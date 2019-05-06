@@ -1806,12 +1806,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fed56e41f464c4a13a74fb657351028c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Height: 6
-  m_Width: 6
+  m_ChunkCountX: 4
+  m_ChunkCountZ: 3
   m_DefaultColor: {r: 1, g: 1, b: 1, a: 1}
   m_CellPrefab: {fileID: 3615676441809663615, guid: 7cf0ff2f9b7f04dfd876c18eaa63a759,
     type: 3}
   m_CellLabelPrefab: {fileID: 3597665698507567631, guid: 00151d22e1e4d4de687a290ae9b3eee5,
+    type: 3}
+  m_ChunkPrefab: {fileID: 2059187222127590094, guid: 5ef6b29ec0ae24c4caf35185f528f2c1,
     type: 3}
   m_NoiseSource: {fileID: 2800000, guid: b0b9be54d250246a6a0e3c34aab4bbe7, type: 3}
 --- !u!4 &1340907827
