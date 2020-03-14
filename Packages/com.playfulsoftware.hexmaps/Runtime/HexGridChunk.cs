@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,16 +18,22 @@ namespace PlayfulSoftware.HexMaps
             m_Cells = new HexCell[HexMetrics.chunkSizeX * HexMetrics.chunkSizeZ];
         }
 
-        void Start()
-        {
-            m_HexMesh.Triangulate(m_Cells);
-        }
-
         public void AddCell(int index, HexCell cell)
         {
             m_Cells[index] = cell;
             cell.transform.SetParent(transform, false);
             cell.uiRect.SetParent(m_GridCanvas.transform, false);
+        }
+
+        public void Refresh()
+        {
+            enabled = true;
+        }
+
+        void LateUpdate()
+        {
+            m_HexMesh.Triangulate(m_Cells);
+            enabled = false;
         }
     }
 }

@@ -39,16 +39,16 @@ namespace PlayfulSoftware.HexMaps
         }
         public Color defaultColor
         {
-            get { return m_DefaultColor; }
-            set { m_DefaultColor = value; }
+            get => m_DefaultColor;
+            set => m_DefaultColor = value;
         }
         public HexCell cellPrefab => m_CellPrefab;
         public Text cellLabelPrefab => m_CellLabelPrefab;
         public HexGridChunk chunkPrefab => m_ChunkPrefab;
         public Texture2D noiseSource
         {
-            get { return m_NoiseSource; }
-            set { m_NoiseSource = value; }
+            get => m_NoiseSource;
+            set => m_NoiseSource = value;
         }
 
         void Awake()
@@ -66,11 +66,11 @@ namespace PlayfulSoftware.HexMaps
         {
             int chunkX = x / HexMetrics.chunkSizeX;
             int chunkZ = z / HexMetrics.chunkSizeZ;
-            HexGridChunk chunk = m_Chunks[chunkX + chunkZ * chunkCountZ];
+            HexGridChunk chunk = m_Chunks[chunkX + chunkZ * chunkCountX];
 
             int localX = x - chunkX * HexMetrics.chunkSizeX;
             int localZ = z - chunkZ * HexMetrics.chunkSizeZ;
-            chunk.AddCell(localX + localZ * HexMetrics.chunkSizeZ, cell);
+            chunk.AddCell(localX + localZ * HexMetrics.chunkSizeX, cell);
         }
 
         void CreateCells()

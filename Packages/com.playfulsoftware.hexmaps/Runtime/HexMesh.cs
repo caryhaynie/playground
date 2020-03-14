@@ -8,33 +8,30 @@ namespace PlayfulSoftware.HexMaps
     {
         Mesh m_HexMesh;
         MeshCollider m_MeshCollider;
-        List<Vector3> m_Vertices;
-        List<int> m_Triangles;
-        List<Color> m_Colors;
+        static readonly List<Vector3> s_Vertices = new List<Vector3>();
+        static readonly List<int> s_Triangles = new List<int>(); 
+        static readonly List<Color> s_Colors = new List<Color>();
 
         void Awake()
         {
             GetComponent<MeshFilter>().mesh = m_HexMesh = new Mesh();
             m_HexMesh.name = "Hex Mesh";
-            m_Vertices = new List<Vector3>();
-            m_Triangles = new List<int>();
-            m_Colors = new List<Color>();
             m_MeshCollider = gameObject.AddComponent<MeshCollider>();
         }
 
         void AddQuad(Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4)
         {
-            var index = m_Vertices.Count;
-            m_Vertices.Add(Perturb(v1));
-            m_Vertices.Add(Perturb(v2));
-            m_Vertices.Add(Perturb(v3));
-            m_Vertices.Add(Perturb(v4));
-            m_Triangles.Add(index); // v1
-            m_Triangles.Add(index + 2); // v3
-            m_Triangles.Add(index + 1); // v2
-            m_Triangles.Add(index + 1); // v2
-            m_Triangles.Add(index + 2); // v3
-            m_Triangles.Add(index + 3); // v4
+            var index = s_Vertices.Count;
+            s_Vertices.Add(Perturb(v1));
+            s_Vertices.Add(Perturb(v2));
+            s_Vertices.Add(Perturb(v3));
+            s_Vertices.Add(Perturb(v4));
+            s_Triangles.Add(index); // v1
+            s_Triangles.Add(index + 2); // v3
+            s_Triangles.Add(index + 1); // v2
+            s_Triangles.Add(index + 1); // v2
+            s_Triangles.Add(index + 2); // v3
+            s_Triangles.Add(index + 3); // v4
         }
 
         void AddQuadColor(Color c1, Color c2)
@@ -43,32 +40,32 @@ namespace PlayfulSoftware.HexMaps
         }
         void AddQuadColor(Color c1, Color c2, Color c3, Color c4)
         {
-            m_Colors.Add(c1);
-            m_Colors.Add(c2);
-            m_Colors.Add(c3);
-            m_Colors.Add(c4);
+            s_Colors.Add(c1);
+            s_Colors.Add(c2);
+            s_Colors.Add(c3);
+            s_Colors.Add(c4);
         }
 
         void AddTriangle(Vector3 v1, Vector3 v2, Vector3 v3)
         {
-            int vertexIndex = m_Vertices.Count;
-            m_Vertices.Add(Perturb(v1));
-            m_Vertices.Add(Perturb(v2));
-            m_Vertices.Add(Perturb(v3));
-            m_Triangles.Add(vertexIndex);
-            m_Triangles.Add(vertexIndex + 1);
-            m_Triangles.Add(vertexIndex + 2);
+            int vertexIndex = s_Vertices.Count;
+            s_Vertices.Add(Perturb(v1));
+            s_Vertices.Add(Perturb(v2));
+            s_Vertices.Add(Perturb(v3));
+            s_Triangles.Add(vertexIndex);
+            s_Triangles.Add(vertexIndex + 1);
+            s_Triangles.Add(vertexIndex + 2);
         }
 
         void AddTriangleUnperturbed(Vector3 v1, Vector3 v2, Vector3 v3)
         {
-            int vertexIndex = m_Vertices.Count;
-            m_Vertices.Add(v1);
-            m_Vertices.Add(v2);
-            m_Vertices.Add(v3);
-            m_Triangles.Add(vertexIndex);
-            m_Triangles.Add(vertexIndex + 1);
-            m_Triangles.Add(vertexIndex + 2);
+            int vertexIndex = s_Vertices.Count;
+            s_Vertices.Add(v1);
+            s_Vertices.Add(v2);
+            s_Vertices.Add(v3);
+            s_Triangles.Add(vertexIndex);
+            s_Triangles.Add(vertexIndex + 1);
+            s_Triangles.Add(vertexIndex + 2);
         }
 
         void AddTriangleColor(Color color)
@@ -78,9 +75,9 @@ namespace PlayfulSoftware.HexMaps
 
         void AddTriangleColor(Color c1, Color c2, Color c3)
         {
-            m_Colors.Add(c1);
-            m_Colors.Add(c2);
-            m_Colors.Add(c3);
+            s_Colors.Add(c1);
+            s_Colors.Add(c2);
+            s_Colors.Add(c3);
         }
 
         Vector3 Perturb(Vector3 position)
@@ -95,16 +92,16 @@ namespace PlayfulSoftware.HexMaps
         public void Triangulate(HexCell[] cells)
         {
             m_HexMesh.Clear();
-            m_Vertices.Clear();
-            m_Triangles.Clear();
-            m_Colors.Clear();
+            s_Vertices.Clear();
+            s_Triangles.Clear();
+            s_Colors.Clear();
             for (int i = 0; i < cells.Length; i++)
             {
                 Triangulate(cells[i]);
             }
-            m_HexMesh.vertices = m_Vertices.ToArray();
-            m_HexMesh.colors = m_Colors.ToArray();
-            m_HexMesh.triangles = m_Triangles.ToArray();
+            m_HexMesh.vertices = s_Vertices.ToArray();
+            m_HexMesh.colors = s_Colors.ToArray();
+            m_HexMesh.triangles = s_Triangles.ToArray();
             m_HexMesh.RecalculateNormals();
             m_MeshCollider.sharedMesh = m_HexMesh;
         }
