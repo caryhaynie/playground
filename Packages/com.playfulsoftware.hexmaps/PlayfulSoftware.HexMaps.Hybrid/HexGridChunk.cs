@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 namespace PlayfulSoftware.HexMaps.Hybrid
 {
-    public class HexGridChunk : MonoBehaviour
+    public sealed class HexGridChunk : MonoBehaviour
     {
         private HexCell[] m_Cells;
         private Canvas m_GridCanvas;

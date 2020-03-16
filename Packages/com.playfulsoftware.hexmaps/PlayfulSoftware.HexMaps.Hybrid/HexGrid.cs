@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 namespace PlayfulSoftware.HexMaps.Hybrid
 {
-    public class HexGrid : MonoBehaviour
+    public sealed class HexGrid : MonoBehaviour
     {
         private int m_CellCountX;
         private int m_CellCountZ;

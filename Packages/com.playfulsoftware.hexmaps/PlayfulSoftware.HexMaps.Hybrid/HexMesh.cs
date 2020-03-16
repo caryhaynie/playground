@@ -4,7 +4,7 @@ using UnityEngine;
 namespace PlayfulSoftware.HexMaps.Hybrid
 {
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
-    public class HexMesh : MonoBehaviour
+    public sealed class HexMesh : MonoBehaviour
     {
         Mesh m_HexMesh;
         MeshCollider m_MeshCollider;
