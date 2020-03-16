@@ -1,9 +1,6 @@
 {
-    "name": "PlayfulSoftware.HexMaps.Tests",
+    "name": "PlayfulSoftware.HexMaps.Hybrid",
     "references": [],
-    "optionalUnityReferences": [
-        "TestAssemblies"
-    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
@@ -11,5 +8,6 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": []
+    "versionDefines": [],
+    "noEngineReferences": false
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 using UnityEngine;
 
-namespace PlayfulSoftware.HexMaps
+namespace PlayfulSoftware.HexMaps.Hybrid
 {
     public struct EdgeVertices
     {

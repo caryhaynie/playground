@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace PlayfulSoftware.HexMaps
+namespace PlayfulSoftware.HexMaps.Hybrid
 {
     public class HexMapEditor : MonoBehaviour
     {

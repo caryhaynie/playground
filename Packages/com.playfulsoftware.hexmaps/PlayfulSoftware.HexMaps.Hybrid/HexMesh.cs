@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace PlayfulSoftware.HexMaps
+namespace PlayfulSoftware.HexMaps.Hybrid
 {
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
     public class HexMesh : MonoBehaviour

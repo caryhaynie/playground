@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace PlayfulSoftware.HexMaps
+namespace PlayfulSoftware.HexMaps.Hybrid
 {
     public class HexGridChunk : MonoBehaviour
     {

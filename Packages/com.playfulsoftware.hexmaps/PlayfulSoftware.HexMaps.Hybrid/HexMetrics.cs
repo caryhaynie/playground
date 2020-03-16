@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace PlayfulSoftware.HexMaps
+namespace PlayfulSoftware.HexMaps.Hybrid
 {
     public static class HexMetrics
     {
