@@ -1,9 +1,9 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace PlayfulSoftware.HexMaps
+namespace PlayfulSoftware.HexMaps.Hybrid
 {
-    public class HexMapEditor : MonoBehaviour
+    public sealed class HexMapEditor : MonoBehaviour
     {
         private Color m_ActiveColor;
         private int m_ActiveElevation;

@@ -2,7 +2,7 @@ using System;
 using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
 
-namespace PlayfulSoftware.HexMaps
+namespace PlayfulSoftware.HexMaps.Hybrid
 {
     public sealed class HexMapCamera : MonoBehaviour
     {

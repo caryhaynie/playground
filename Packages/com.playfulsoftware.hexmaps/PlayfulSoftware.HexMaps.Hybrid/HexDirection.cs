@@ -1,4 +1,4 @@
-namespace PlayfulSoftware.HexMaps
+namespace PlayfulSoftware.HexMaps.Hybrid
 {
     public enum HexDirection
     {

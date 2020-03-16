@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEditor;
 #endif // UNITY_EDITOR
 
-namespace PlayfulSoftware.HexMaps
+namespace PlayfulSoftware.HexMaps.Hybrid
 {
     [Serializable]
     public struct HexCoordinates
