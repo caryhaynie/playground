@@ -165,9 +165,26 @@ namespace PlayfulSoftware.HexMaps
         {
             position = transform.InverseTransformPoint(position);
             var coordinates = HexCoordinates.FromPosition(position);
-            //Debug.LogFormat("touched at {0}", coordinates);
-            int index = coordinates.x + coordinates.z * cellCountZ + coordinates.z / 2;
+            int index = coordinates.x + coordinates.z * cellCountX + coordinates.z / 2;
+            Debug.LogFormat("touched at {0} (index: {1}", coordinates, index);
             return m_Cells[index];
+        }
+
+        public HexCell GetCell(HexCoordinates coordinates)
+        {
+            int z = coordinates.z;
+            if (z < 0 || z >= cellCountZ)
+                return null;
+            int x = coordinates.x + z / 2;
+            if (x < 0 || x >= cellCountX)
+                return null;
+            return m_Cells[x + z * cellCountX];
+        }
+
+        public void ShowUI(bool visible)
+        {
+            foreach (var chunk in m_Chunks)
+                chunk.ShowUI(visible);
         }
     }
 }

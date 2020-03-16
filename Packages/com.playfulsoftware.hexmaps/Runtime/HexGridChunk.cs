@@ -16,11 +16,13 @@ namespace PlayfulSoftware.HexMaps
             m_HexMesh = GetComponentInChildren<HexMesh>();
 
             m_Cells = new HexCell[HexMetrics.chunkSizeX * HexMetrics.chunkSizeZ];
+            ShowUI(false);
         }
 
         public void AddCell(int index, HexCell cell)
         {
             m_Cells[index] = cell;
+            cell.chunk = this;
             cell.transform.SetParent(transform, false);
             cell.uiRect.SetParent(m_GridCanvas.transform, false);
         }
@@ -28,6 +30,11 @@ namespace PlayfulSoftware.HexMaps
         public void Refresh()
         {
             enabled = true;
+        }
+
+        public void ShowUI(bool visible)
+        {
+            m_GridCanvas.gameObject.SetActive(visible);
         }
 
         void LateUpdate()
