@@ -9,7 +9,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         Mesh m_HexMesh;
         MeshCollider m_MeshCollider;
         static readonly List<Vector3> s_Vertices = new List<Vector3>();
-        static readonly List<int> s_Triangles = new List<int>(); 
+        static readonly List<int> s_Triangles = new List<int>();
         static readonly List<Color> s_Colors = new List<Color>();
 
         void Awake()
@@ -121,49 +121,16 @@ namespace PlayfulSoftware.HexMaps.Hybrid
                 center + HexMetrics.GetFirstSolidCorner(direction),
                 center + HexMetrics.GetSecondSolidCorner(direction));
 
-            /*
-            var v1 = center + HexMetrics.GetFirstSolidCorner(direction);
-            var v2 = center + HexMetrics.GetSecondSolidCorner(direction);
-
-            switch (subdivisions)
+            if (cell.hasRiver)
             {
-                case 0:
+                if (cell.HasRiverThroughEdge(direction))
                 {
-                    AddTriangle(center, v1, v2);
-                    AddTriangleColor(cell.color);
-
-                    break;
-                }
-                default:
-                {
-                    var sections = subdivisions + 1;
-
-                    var e1 = Vector3.Lerp(v1, v2, 1f / (float)sections);
-                    var e2 = e1;
-
-                    // first triangle
-                    AddTriangle(center, v1, e1);
-                    AddTriangleColor(cell.color);
-
-                    for (var i = 2; i < sections; i++)
-                    {
-                        e1 = e2;
-                        e2 = Vector3.Lerp(v1, v2, (float)i / (float)sections);
-
-                        AddTriangle(center, e1, e2);
-                        AddTriangleColor(cell.color);
-                    }
-
-                    // last triangle
-                    AddTriangle(center, e1, v2);
-                    AddTriangleColor(cell.color);
-
-                    break;
+                    el.v3.y = cell.streamBedY;
+                    TriangulateWithRiver(direction, cell, center, el);
                 }
             }
-            */
-
-            TriangulateEdgeFan(center, el, cell.color);
+            else
+                    TriangulateEdgeFan(center, el, cell.color);
 
             if (direction <= HexDirection.SE)
                 TriangulateConnection(direction, cell, el);
@@ -207,7 +174,10 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             bridge.y = neighbor.position.y - cell.position.y;
             var el2 = new EdgeVertices(
                 el.v1 + bridge,
-                el.v4 + bridge);
+                el.v5 + bridge);
+
+            if (cell.HasRiverThroughEdge(direction))
+                el2.v3.y = neighbor.streamBedY;
 
             if (cell.GetEdgeType(direction) == HexEdgeType.Slope)
                 TriangulateEdgeTerraces(el, cell, el2, neighbor);
@@ -220,19 +190,19 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             var nextNeighbor = cell.GetNeighbor(next_d);
             if (direction <= HexDirection.E && nextNeighbor != null)
             {
-                var v5 = el.v4 + HexMetrics.GetBridge(next_d);
+                var v5 = el.v5 + HexMetrics.GetBridge(next_d);
                 v5.y = nextNeighbor.position.y;
                 if (cell.elevation <= neighbor.elevation)
                 {
                     if (cell.elevation <= nextNeighbor.elevation)
-                        TriangulateCorner(el.v4, cell, el2.v4, neighbor, v5, nextNeighbor);
+                        TriangulateCorner(el.v5, cell, el2.v5, neighbor, v5, nextNeighbor);
                     else
-                        TriangulateCorner(v5, nextNeighbor, el.v4, cell, el2.v4, neighbor);
+                        TriangulateCorner(v5, nextNeighbor, el.v5, cell, el2.v5, neighbor);
                 }
                 else if (neighbor.elevation <= nextNeighbor.elevation)
-                    TriangulateCorner(el2.v4, neighbor, v5, nextNeighbor, el.v4, cell);
+                    TriangulateCorner(el2.v5, neighbor, v5, nextNeighbor, el.v5, cell);
                 else
-                    TriangulateCorner(v5, nextNeighbor, el.v4, cell, el2.v4, neighbor);
+                    TriangulateCorner(v5, nextNeighbor, el.v5, cell, el2.v5, neighbor);
                 //AddTriangle(v2, v4, v5);
                 //AddTriangleColor(cell.color, neighbor.color, nextNeighbor.color);
             }
@@ -368,6 +338,8 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             AddTriangleColor(color);
             AddTriangle(center, edge.v3, edge.v4);
             AddTriangleColor(color);
+            AddTriangle(center, edge.v4, edge.v5);
+            AddTriangleColor(color);
         }
 
         void TriangulateEdgeFan(Vector3 center, EdgeVertexList edge, Color color)
@@ -386,6 +358,8 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             AddQuad(e1.v2, e1.v3, e2.v2, e2.v3);
             AddQuadColor(c1, c2);
             AddQuad(e1.v3, e1.v4, e2.v3, e2.v4);
+            AddQuadColor(c1, c2);
+            AddQuad(e1.v4, e1.v5, e2.v4, e2.v5);
             AddQuadColor(c1, c2);
         }
 
@@ -430,5 +404,22 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             // last step
             TriangulateEdgeStrip(e2, c2, end, endCell.color);
         }
+
+        void TriangulateWithRiver (
+            HexDirection direction, HexCell cell, Vector3 center, EdgeVertices e
+        )
+        {
+            var centerL = center + HexMetrics.GetFirstSolidCorner(direction.Previous()) * 0.25f;
+            var centerR = center + HexMetrics.GetSecondSolidCorner(direction.Next()) * 0.25f;
+
+            var m = new EdgeVertices(
+                Vector3.Lerp(centerL, e.v1, 0.5f),
+                Vector3.Lerp(centerR, e.v5, 0.5f),
+                1f / 6f);
+
+            m.v3.y = center.y = e.v3.y;
+            TriangulateEdgeStrip(m, cell.color, e, cell.color);
+        }
+
     }
 }

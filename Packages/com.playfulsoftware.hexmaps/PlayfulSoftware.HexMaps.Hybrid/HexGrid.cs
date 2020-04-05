@@ -166,7 +166,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             position = transform.InverseTransformPoint(position);
             var coordinates = HexCoordinates.FromPosition(position);
             int index = coordinates.x + coordinates.z * cellCountX + coordinates.z / 2;
-            Debug.LogFormat("touched at {0} (index: {1}", coordinates, index);
+            //Debug.LogFormat("touched at {0} (index: {1})", coordinates, index);
             return m_Cells[index];
         }
 
