@@ -1,4 +1,4 @@
-﻿Shader "Custom/VertexColors"
+﻿Shader "Custom/River    "
 {
     Properties
     {
@@ -9,23 +9,23 @@
     }
     SubShader
     {
-        Tags { "RenderType"="Opaque" }
+        Tags { "RenderType"="Transparent" "Queue" = "Transparent" }
         LOD 200
 
         CGPROGRAM
         // Physically based Standard lighting model, and enable shadows on all light types
-        #pragma surface surf Standard fullforwardshadows
+        #pragma surface surf Standard alpha
 
         // Use shader model 3.0 target, to get nicer looking lighting
         #pragma target 3.0
 
+        sampler2D _MainTex;
+
         struct Input
         {
             float2 uv_MainTex;
-            float4 color : COLOR;
         };
 
-        sampler2D _MainTex;
         half _Glossiness;
         half _Metallic;
         fixed4 _Color;
@@ -39,9 +39,19 @@
 
         void surf (Input IN, inout SurfaceOutputStandard o)
         {
+            float2 uv = IN.uv_MainTex;
+            uv.x = uv.x * 0.0625 + _Time.y * 0.005;
+            uv.y -= _Time.y * 0.25;
+            float4 noise = tex2D(_MainTex, uv);
+
+            float2 uv2 = IN.uv_MainTex;
+            uv2.x = uv2.x * 0.0625 - _Time.y * 0.0052;
+            uv.y -= _Time.y * 0.23;
+            float4 noise2 = tex2D(_MainTex, uv2);
+
             // Albedo comes from a texture tinted by color
-            fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
-            o.Albedo = c.rgb * IN.color;
+            fixed4 c = saturate(_Color + (noise.r * noise2.a));
+            o.Albedo = c.rgb;
             // Metallic and smoothness come from slider variables
             o.Metallic = _Metallic;
             o.Smoothness = _Glossiness;

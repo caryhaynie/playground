@@ -18,13 +18,27 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         }
 
         public static HexDirection Previous(this HexDirection direction)
-        {
-            return direction == HexDirection.NE ? HexDirection.NW : (direction - 1);
-        }
+            => direction.PreviousBySteps(1);
 
         public static HexDirection Next(this HexDirection direction)
+            => direction.NextBySteps(1);
+
+        public static HexDirection Previous2(this HexDirection direction)
+            => direction.PreviousBySteps(2);
+
+        public static HexDirection Next2(this HexDirection direction)
+            => direction.NextBySteps(2);
+
+        static HexDirection PreviousBySteps(this HexDirection direction, int steps)
         {
-            return direction == HexDirection.NW ? HexDirection.NE : (direction + 1);
+            direction -= steps;
+            return direction >= HexDirection.NE ? direction : (direction + 6);
+        }
+
+        static HexDirection NextBySteps(this HexDirection direction, int steps)
+        {
+            direction += steps;
+            return direction <= HexDirection.NW ? direction : (direction - 6);
         }
     }
 }

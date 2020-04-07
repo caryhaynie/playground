@@ -1,3 +1,4 @@
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -5,24 +6,43 @@ namespace PlayfulSoftware.HexMaps.Hybrid
 {
     public sealed class HexMapEditor : MonoBehaviour
     {
-        private Color m_ActiveColor;
-        private int m_ActiveElevation;
-        private bool m_ApplyColor;
-        private bool m_ApplyElevation;
-        private int m_BrushSize;
+        enum OptionalToggle
+        {
+            Ignore, Yes, No
+        }
+
+        #region Non-Serialized Fields
+        Color m_ActiveColor;
+        int m_ActiveElevation;
+        bool m_ApplyColor;
+        bool m_ApplyElevation;
+        int m_BrushSize;
+        OptionalToggle m_RiverMode = OptionalToggle.Ignore;
+        #endregion
+
+        #region Drag-related Fields
+        HexDirection m_DragDirection;
+        bool m_IsDrag;
+        HexCell m_PreviousCell;
+        #endregion
+
+        #region Serialized Fields
         [SerializeField]
-        private HexGrid m_HexGrid;
+        HexGrid m_HexGrid;
         [SerializeField]
-        private Color[] m_Colors;
+        Color[] m_Colors;
+        #endregion
+
         public Color[] colors
         {
-            get { return m_Colors; }
-            set { m_Colors = value; }
+            get => m_Colors;
+            set => m_Colors = value;
         }
+
         public HexGrid hexGrid
         {
-            get { return m_HexGrid; }
-            set { m_HexGrid = value; }
+            get => m_HexGrid;
+            set => m_HexGrid = value;
         }
 
         void Awake()
@@ -35,7 +55,23 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             var inputRay = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
             if (Physics.Raycast(inputRay, out hit))
-                EditCells(m_HexGrid.GetCell(hit.point));
+            {
+                var currentCell = m_HexGrid.GetCell(hit.point);
+                if (m_PreviousCell && m_PreviousCell != currentCell)
+                {
+                    ValidateDrag(currentCell);
+                }
+                else
+                {
+                    m_IsDrag = false;
+                }
+                EditCells(currentCell);
+                m_PreviousCell = currentCell;
+            }
+            else
+            {
+                m_PreviousCell = null;
+            }
         }
 
         void EditCells(HexCell center)
@@ -64,6 +100,14 @@ namespace PlayfulSoftware.HexMaps.Hybrid
                 cell.color = m_ActiveColor;
             if (m_ApplyElevation)
                 cell.elevation = m_ActiveElevation;
+            if (m_RiverMode == OptionalToggle.No)
+                cell.RemoveRiver();
+            else if (m_IsDrag && m_RiverMode == OptionalToggle.Yes)
+            {
+                var otherCell = cell.GetNeighbor(m_DragDirection.Opposite());
+                if (otherCell)
+                    otherCell.SetOutgoingRiver(m_DragDirection);
+            }
         }
 
         public void SelectColor(int index)
@@ -88,6 +132,11 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             m_ActiveElevation = (int)elevation;
         }
 
+        public void SetRiverMode(int mode)
+        {
+            m_RiverMode = (OptionalToggle) mode;
+        }
+
         public void ShowUI(bool visible)
         {
             m_HexGrid.ShowUI(visible);
@@ -99,6 +148,24 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             var isOverGO = EventSystem.current.IsPointerOverGameObject();
             if (isClick && !isOverGO)
                 HandleInput();
+            else
+            {
+                m_PreviousCell = null;
+            }
+        }
+
+        void ValidateDrag(HexCell currentCell)
+        {
+            for (m_DragDirection = HexDirection.NE; m_DragDirection <= HexDirection.NW; m_DragDirection++)
+            {
+                if (m_PreviousCell.GetNeighbor(m_DragDirection) == currentCell)
+                {
+                    m_IsDrag = true;
+                    return;
+                }
+            }
+
+            m_IsDrag = false;
         }
     }
 }
