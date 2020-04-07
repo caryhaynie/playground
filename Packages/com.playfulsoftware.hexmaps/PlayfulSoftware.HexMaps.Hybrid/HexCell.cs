@@ -66,6 +66,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         public bool hasRiver => hasIncomingRiver || hasOutgoingRiver;
         public bool hasRiverBeginOrEnd => hasIncomingRiver != hasOutgoingRiver;
 
+        public float riverSurfaceY => (elevation + HexMetrics.riverSurfaceElevationOffset) * HexMetrics.elevationStep;
         public float streamBedY => (elevation + HexMetrics.streamBedElevationOffset) * HexMetrics.elevationStep;
 
         public HexEdgeType GetEdgeType(HexCell otherCell)

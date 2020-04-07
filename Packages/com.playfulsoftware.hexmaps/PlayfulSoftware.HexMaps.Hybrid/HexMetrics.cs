@@ -5,20 +5,24 @@ namespace PlayfulSoftware.HexMaps.Hybrid
     public static class HexMetrics
     {
         public const float blendFactor = 1f - solidFactor;
-        public const float cellPerturbStrength = 0f; //4f;
+        public const float cellPerturbStrength = 4f;
         public const int chunkSizeX = 5, chunkSizeZ = 5;
         public const float elevationPerturbStrength = 1.5f;
         public const float elevationStep = 3f;
         public const float horizontalTerraceStepSize = 1f / terracedSteps;
-        public const float innerRadius = outerRadius * 0.866025404f; // sqrt(3) / 2
+        public const float innerRadius = outerRadius * outerToInner; // sqrt(3) / 2
         public const float noiseScale = 0.003f;
         public const float outerRadius = 10f;
+        public const float riverSurfaceElevationOffset = -0.5f;
         public const float solidFactor = 0.8f;
-        public const float streamBedElevationOffset = -1f;
+        public const float streamBedElevationOffset = -1.75f;
         public const int terracesPerSlope = 2;
         public const int terracedSteps = terracesPerSlope * 2 + 1;
         public const uint triangleSubdivisions = 2;
         public const float verticalTerraceStepSize = 1f / (terracesPerSlope + 1);
+
+        public const float outerToInner = 0.866025404f;
+        public const float innerToOuter = 1f / outerToInner;
 
         static Vector3[] corners = {
             new Vector3(0f, 0f, outerRadius), // N
@@ -69,6 +73,21 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         public static Vector3 GetSecondSolidCorner(HexDirection d)
         {
             return GetSecondCorner(d) * solidFactor;
+        }
+
+        public static Vector3 GetSolidEdgeMiddle(HexDirection d)
+        {
+            var d2 = ((int)d + 1) % (corners.Length);
+            return (corners[(int) d] + corners[d2])
+                   * (0.5f * solidFactor);
+        }
+
+        public static Vector3 Perturb(Vector3 position)
+        {
+            var sample = SampleNoise(position);
+            position.x += (sample.x * 2f - 1f) * cellPerturbStrength;
+            position.z += (sample.z * 2f - 1f) * cellPerturbStrength;
+            return position;
         }
 
         public static Vector4 SampleNoise(Vector3 position)
