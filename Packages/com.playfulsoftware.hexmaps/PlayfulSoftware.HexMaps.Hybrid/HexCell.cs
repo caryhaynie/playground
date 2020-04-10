@@ -5,7 +5,9 @@ namespace PlayfulSoftware.HexMaps.Hybrid
 {
     public sealed class HexCell : MonoBehaviour
     {
-        readonly HexCell[] m_Neighbors = new HexCell[6];
+        [SerializeField] HexCell[] m_Neighbors;
+        [SerializeField] bool[] m_Roads;
+
         Color m_Color;
         [SerializeField] int m_Elevation = Int32.MinValue;
         bool m_HasIncomingRiver, m_HasOutgoingRiver;
@@ -14,6 +16,19 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         public HexCoordinates coordinates;
         [HideInInspector] public HexGridChunk chunk;
         [HideInInspector] public RectTransform uiRect;
+
+        public Color color
+        {
+            get => m_Color;
+            set
+            {
+                if (m_Color == value)
+                    return;
+                m_Color = value;
+
+                Refresh();
+            }
+        }
 
         public int elevation
         {
@@ -26,6 +41,9 @@ namespace PlayfulSoftware.HexMaps.Hybrid
 
                 // verify rivers
                 RemoveRiversIfInvalid();
+
+                // verify roads
+                RemoveRoadsIfInvalid();
 
                 // Update Transform
                 var pos = transform.localPosition;
@@ -43,21 +61,6 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             }
         }
 
-        public Vector3 position => transform.localPosition;
-
-        public Color color
-        {
-            get => m_Color;
-            set
-            {
-                if (m_Color == value)
-                    return;
-                m_Color = value;
-
-                Refresh();
-            }
-        }
-
         public bool hasIncomingRiver => m_HasIncomingRiver;
         public bool hasOutgoingRiver => m_HasOutgoingRiver;
         public HexDirection incomingRiver => m_IncomingRiver;
@@ -66,8 +69,30 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         public bool hasRiver => hasIncomingRiver || hasOutgoingRiver;
         public bool hasRiverBeginOrEnd => hasIncomingRiver != hasOutgoingRiver;
 
+        public Vector3 position => transform.localPosition;
+
+        public HexDirection riverBeginOrEndDirection => hasIncomingRiver ? incomingRiver : outgoingRiver;
+
         public float riverSurfaceY => (elevation + HexMetrics.riverSurfaceElevationOffset) * HexMetrics.elevationStep;
         public float streamBedY => (elevation + HexMetrics.streamBedElevationOffset) * HexMetrics.elevationStep;
+
+#if UNITY_EDITOR
+        void Reset()
+        {
+            m_Neighbors = new HexCell[6];
+            m_Roads = new bool[6];
+        }
+#endif // UNITY_EDITOR
+
+        public void AddRoad(HexDirection dir)
+        {
+            if (!m_Roads[(int) dir]
+                && !HasRiverThroughEdge(dir)
+                && GetElevationDifference(dir) <= 1)
+            {
+                SetRoad((int)dir, true);
+            }
+        }
 
         public HexEdgeType GetEdgeType(HexCell otherCell)
         {
@@ -77,6 +102,12 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         public HexEdgeType GetEdgeType(HexDirection direction)
         {
             return GetEdgeType(GetNeighbor(direction));
+        }
+
+        public int GetElevationDifference(HexDirection dir)
+        {
+            var neighbor = GetNeighbor(dir);
+            return !neighbor ? 0 : Mathf.Abs(elevation - neighbor.elevation);
         }
 
         public HexCell GetNeighbor(HexDirection direction)
@@ -89,6 +120,19 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             return hasIncomingRiver && incomingRiver == dir ||
                    hasOutgoingRiver && outgoingRiver == dir;
         }
+
+        public bool HasRoads
+        {
+            get
+            {
+                for (int i = 0; i < m_Roads.Length; i++)
+                    if (m_Roads[i])
+                        return true;
+                return false;
+            }
+        }
+
+        public bool HasRoadThroughEdge(HexDirection dir) => m_Roads[(int) dir];
 
         public void RemoveIncomingRiver()
         {
@@ -143,6 +187,34 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             }
         }
 
+        public void RemoveRoads()
+        {
+            for (int i = 0; i < m_Neighbors.Length; i++)
+            {
+                if (m_Roads[i])
+                {
+                    SetRoad(i, false);
+                }
+            }
+        }
+
+        void RemoveRoadsIfInvalid()
+        {
+            for (int i = 0; i < m_Roads.Length; i++)
+            {
+                if (m_Roads[i] && GetElevationDifference((HexDirection) i) > 1)
+                {
+                    SetRoad(i, false);
+                }
+            }
+        }
+
+        public void SetNeighbor(HexDirection direction, HexCell cell)
+        {
+            m_Neighbors[(int) direction] = cell;
+            cell.m_Neighbors[(int) direction.Opposite()] = this;
+        }
+
         public void SetOutgoingRiver(HexDirection dir)
         {
             // nothing to do; already have an outgoing river in this direction.
@@ -165,7 +237,6 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             // actually update the river state now, and refresh.
             m_HasOutgoingRiver = true;
             m_OutgoingRiver = dir;
-            RefreshSelfOnly();
 
             // update our neighbor too.
             if (!neighbor)
@@ -173,13 +244,8 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             neighbor.RemoveIncomingRiver();
             neighbor.m_HasIncomingRiver = true;
             neighbor.m_IncomingRiver = dir.Opposite();
-            neighbor.RefreshSelfOnly();
-        }
 
-        public void SetNeighbor(HexDirection direction, HexCell cell)
-        {
-            m_Neighbors[(int) direction] = cell;
-            cell.m_Neighbors[(int) direction.Opposite()] = this;
+            SetRoad((int)dir, false);
         }
 
         void Refresh()
@@ -206,5 +272,12 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             }
         }
 
-}
+        void SetRoad(int index, bool state)
+        {
+            m_Roads[index] = state;
+            m_Neighbors[index].m_Roads[(int) ((HexDirection) index).Opposite()] = state;
+            m_Neighbors[index].RefreshSelfOnly();
+            RefreshSelfOnly();
+        }
+    }
 }
