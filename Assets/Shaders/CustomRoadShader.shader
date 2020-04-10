@@ -1,4 +1,4 @@
-﻿Shader "Custom/River"
+﻿Shader "Custom/Road"
 {
     Properties
     {
@@ -9,12 +9,13 @@
     }
     SubShader
     {
-        Tags { "RenderType"="Transparent" "Queue" = "Transparent" }
+        Tags { "RenderType"="Opaque" "Queue" = "Geometry+1" }
         LOD 200
+        Offset -1, -1
 
         CGPROGRAM
         // Physically based Standard lighting model, and enable shadows on all light types
-        #pragma surface surf Standard alpha
+        #pragma surface surf Standard fullforwardshadows decal:blend
 
         // Use shader model 3.0 target, to get nicer looking lighting
         #pragma target 3.0
@@ -24,6 +25,7 @@
         struct Input
         {
             float2 uv_MainTex;
+            float3 worldPos;
         };
 
         half _Glossiness;
@@ -39,23 +41,17 @@
 
         void surf (Input IN, inout SurfaceOutputStandard o)
         {
-            float2 uv = IN.uv_MainTex;
-            uv.x = uv.x * 0.0625 + _Time.y * 0.005;
-            uv.y -= _Time.y * 0.25;
-            float4 noise = tex2D(_MainTex, uv);
+            float4 noise = tex2D(_MainTex, IN.worldPos.xz * 0.0025);
+            fixed4 c = _Color * (noise.y * 0.75 + 0.25);
+            float4 blend = IN.uv_MainTex.x;
+            blend *= noise.x + 0.5;
+            blend = smoothstep(0.4, 0.7, blend);
 
-            float2 uv2 = IN.uv_MainTex;
-            uv2.x = uv2.x * 0.0625 - _Time.y * 0.0052;
-            uv.y -= _Time.y * 0.23;
-            float4 noise2 = tex2D(_MainTex, uv2);
-
-            // Albedo comes from a texture tinted by color
-            fixed4 c = saturate(_Color + (noise.r * noise2.a));
             o.Albedo = c.rgb;
             // Metallic and smoothness come from slider variables
             o.Metallic = _Metallic;
             o.Smoothness = _Glossiness;
-            o.Alpha = c.a;
+            o.Alpha = blend;
         }
         ENDCG
     }

@@ -18,6 +18,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         bool m_ApplyElevation;
         int m_BrushSize;
         OptionalToggle m_RiverMode = OptionalToggle.Ignore;
+        OptionalToggle m_RoadMode = OptionalToggle.Ignore;
         #endregion
 
         #region Drag-related Fields
@@ -47,7 +48,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
 
         void Awake()
         {
-            SelectColor(0);
+            SelectColor(-1);
         }
 
         void HandleInput()
@@ -102,11 +103,18 @@ namespace PlayfulSoftware.HexMaps.Hybrid
                 cell.elevation = m_ActiveElevation;
             if (m_RiverMode == OptionalToggle.No)
                 cell.RemoveRiver();
-            else if (m_IsDrag && m_RiverMode == OptionalToggle.Yes)
+            if (m_RoadMode == OptionalToggle.No)
+                cell.RemoveRoads();
+            if (m_IsDrag)
             {
                 var otherCell = cell.GetNeighbor(m_DragDirection.Opposite());
                 if (otherCell)
-                    otherCell.SetOutgoingRiver(m_DragDirection);
+                {
+                    if (m_RiverMode == OptionalToggle.Yes)
+                        otherCell.SetOutgoingRiver(m_DragDirection);
+                    if (m_RoadMode == OptionalToggle.Yes)
+                        otherCell.AddRoad(m_DragDirection);
+                }
             }
         }
 
@@ -135,6 +143,11 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         public void SetRiverMode(int mode)
         {
             m_RiverMode = (OptionalToggle) mode;
+        }
+
+        public void SetRoadMode(int mode)
+        {
+            m_RoadMode = (OptionalToggle) mode;
         }
 
         public void ShowUI(bool visible)
