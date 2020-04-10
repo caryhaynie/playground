@@ -12,6 +12,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         [SerializeField] int m_Elevation = Int32.MinValue;
         bool m_HasIncomingRiver, m_HasOutgoingRiver;
         HexDirection m_IncomingRiver, m_OutgoingRiver;
+        [SerializeField] int m_WaterLevel;
 
         public HexCoordinates coordinates;
         [HideInInspector] public HexGridChunk chunk;
@@ -75,6 +76,18 @@ namespace PlayfulSoftware.HexMaps.Hybrid
 
         public float riverSurfaceY => (elevation + HexMetrics.riverSurfaceElevationOffset) * HexMetrics.elevationStep;
         public float streamBedY => (elevation + HexMetrics.streamBedElevationOffset) * HexMetrics.elevationStep;
+
+        public int waterLevel
+        {
+            get => m_WaterLevel;
+            set
+            {
+                if (m_WaterLevel == value)
+                    return;
+                m_WaterLevel = value;
+                Refresh();
+            }
+        }
 
 #if UNITY_EDITOR
         void Reset()
