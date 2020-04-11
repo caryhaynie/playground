@@ -14,8 +14,10 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         #region Non-Serialized Fields
         Color m_ActiveColor;
         int m_ActiveElevation;
+        int m_ActiveWaterLevel;
         bool m_ApplyColor;
         bool m_ApplyElevation;
+        bool m_ApplyWaterLevel;
         int m_BrushSize;
         OptionalToggle m_RiverMode = OptionalToggle.Ignore;
         OptionalToggle m_RoadMode = OptionalToggle.Ignore;
@@ -101,6 +103,8 @@ namespace PlayfulSoftware.HexMaps.Hybrid
                 cell.color = m_ActiveColor;
             if (m_ApplyElevation)
                 cell.elevation = m_ActiveElevation;
+            if (m_ApplyWaterLevel)
+                cell.waterLevel = m_ActiveWaterLevel;
             if (m_RiverMode == OptionalToggle.No)
                 cell.RemoveRiver();
             if (m_RoadMode == OptionalToggle.No)
@@ -130,6 +134,11 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             m_ApplyElevation = toggle;
         }
 
+        public void SetApplyWaterLevel(bool toggle)
+        {
+            m_ApplyWaterLevel = toggle;
+        }
+
         public void SetBrushSize(float brushSize)
         {
             m_BrushSize = (int)brushSize;
@@ -148,6 +157,11 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         public void SetRoadMode(int mode)
         {
             m_RoadMode = (OptionalToggle) mode;
+        }
+
+        public void SetWaterLevel(float level)
+        {
+            m_ActiveWaterLevel = (int)level;
         }
 
         public void ShowUI(bool visible)

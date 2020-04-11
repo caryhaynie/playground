@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: HexGridRoads
-  m_Shader: {fileID: 4800000, guid: 9eb6dc10a177949dab643ca269ba2bbc, type: 3}
+  m_Name: HexGridWater
+  m_Shader: {fileID: 4800000, guid: 48fd748f60d344724ad5aae0fceb0e2c, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -73,5 +73,5 @@ Material:
     - _UVSec: 0
     - _ZWrite: 1
     m_Colors:
-    - _Color: {r: 0.9716981, g: 0, b: 0, a: 1}
+    - _Color: {r: 0.013616921, g: 0.07749692, b: 0.9622642, a: 0.34509805}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}

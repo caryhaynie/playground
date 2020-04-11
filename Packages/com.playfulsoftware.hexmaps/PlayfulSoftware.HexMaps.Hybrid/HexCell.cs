@@ -65,6 +65,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         public bool hasIncomingRiver => m_HasIncomingRiver;
         public bool hasOutgoingRiver => m_HasOutgoingRiver;
         public HexDirection incomingRiver => m_IncomingRiver;
+        public bool isUnderWater => m_WaterLevel > m_Elevation;
         public HexDirection outgoingRiver => m_OutgoingRiver;
 
         public bool hasRiver => hasIncomingRiver || hasOutgoingRiver;
@@ -74,7 +75,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
 
         public HexDirection riverBeginOrEndDirection => hasIncomingRiver ? incomingRiver : outgoingRiver;
 
-        public float riverSurfaceY => (elevation + HexMetrics.riverSurfaceElevationOffset) * HexMetrics.elevationStep;
+        public float riverSurfaceY => (elevation + HexMetrics.waterSurfaceElevationOffset) * HexMetrics.elevationStep;
         public float streamBedY => (elevation + HexMetrics.streamBedElevationOffset) * HexMetrics.elevationStep;
 
         public int waterLevel
@@ -88,6 +89,8 @@ namespace PlayfulSoftware.HexMaps.Hybrid
                 Refresh();
             }
         }
+
+        public float waterSurfaceY => (waterLevel + HexMetrics.waterSurfaceElevationOffset) * HexMetrics.elevationStep;
 
 #if UNITY_EDITOR
         void Reset()

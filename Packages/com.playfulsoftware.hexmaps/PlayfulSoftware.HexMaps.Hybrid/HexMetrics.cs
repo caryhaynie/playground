@@ -13,7 +13,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         public const float innerRadius = outerRadius * outerToInner; // sqrt(3) / 2
         public const float noiseScale = 0.003f;
         public const float outerRadius = 10f;
-        public const float riverSurfaceElevationOffset = -0.5f;
+        public const float waterSurfaceElevationOffset = -0.5f;
         public const float solidFactor = 0.8f;
         public const float streamBedElevationOffset = -1.75f;
         public const int terracesPerSlope = 2;
