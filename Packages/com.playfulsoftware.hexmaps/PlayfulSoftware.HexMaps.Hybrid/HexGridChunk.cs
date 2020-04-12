@@ -1,6 +1,4 @@
-using System;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace PlayfulSoftware.HexMaps.Hybrid
 {
@@ -551,17 +549,23 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         void TriangulateWater(HexDirection dir, HexCell cell, Vector3 center)
         {
             center.y = cell.waterSurfaceY;
+
+            var neighbor = cell.GetNeighbor(dir);
+            if (neighbor && !neighbor.isUnderWater)
+                TriangulateWaterShore(dir, cell, neighbor, center);
+            else
+                TriangulateOpenWater(dir, cell, neighbor, center);
+        }
+
+        void TriangulateOpenWater(HexDirection dir, HexCell cell, HexCell neighbor, Vector3 center)
+        {
             var c1 = center + HexMetrics.GetFirstSolidCorner(dir);
             var c2 = center + HexMetrics.GetSecondSolidCorner(dir);
 
             water.AddTriangle(center, c1, c2);
 
-            if (dir <= HexDirection.SE)
+            if (dir <= HexDirection.SE && neighbor)
             {
-                var neighbor = cell.GetNeighbor(dir);
-                if (!neighbor || !neighbor.isUnderWater)
-                    return;
-
                 var bridge = HexMetrics.GetBridge(dir);
                 var e1 = c1 + bridge;
                 var e2 = c2 + bridge;
@@ -576,6 +580,32 @@ namespace PlayfulSoftware.HexMaps.Hybrid
                     water.AddTriangle(c2, e2, c2 + HexMetrics.GetBridge(dir.Next()));
                 }
             }
+        }
+
+        void TriangulateWaterShore(HexDirection dir, HexCell cell, HexCell neighbor, Vector3 center)
+        {
+            var e1 = new EdgeVertices(
+                center + HexMetrics.GetFirstSolidCorner(dir),
+                center + HexMetrics.GetSecondSolidCorner(dir));
+
+            water.AddTriangle(center, e1.v1, e1.v2);
+            water.AddTriangle(center, e1.v2, e1.v3);
+            water.AddTriangle(center, e1.v3, e1.v4);
+            water.AddTriangle(center, e1.v4, e1.v5);
+
+            var bridge = HexMetrics.GetBridge(dir);
+            var e2 = new EdgeVertices(
+                e1.v1 + bridge,
+                e1.v5 + bridge);
+
+            water.AddQuad(e1.v1, e1.v2, e2.v1, e2.v2);
+            water.AddQuad(e1.v2, e1.v3, e2.v2, e2.v3);
+            water.AddQuad(e1.v3, e1.v4, e2.v3, e2.v4);
+            water.AddQuad(e1.v4, e1.v5, e2.v4, e2.v5);
+
+            var nextNeighbor = cell.GetNeighbor(dir.Next());
+            if (nextNeighbor)
+                water.AddTriangle(e1.v5, e2.v5, e1.v5 + HexMetrics.GetBridge(dir.Next()));
         }
 
         void TriangulateWithoutRiver(HexDirection dir, HexCell cell, Vector3 center, EdgeVertices e)
