@@ -5,6 +5,7 @@ using UnityEngine;
 namespace PlayfulSoftware.HexMaps.Hybrid
 {
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
+    [DisallowMultipleComponent]
     public sealed class HexMesh : MonoBehaviour
     {
         public bool useCollider;
@@ -67,6 +68,21 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             m_Vertices.Add(HexMetrics.Perturb(v2));
             m_Vertices.Add(HexMetrics.Perturb(v3));
             m_Vertices.Add(HexMetrics.Perturb(v4));
+            m_Triangles.Add(index); // v1
+            m_Triangles.Add(index + 2); // v3
+            m_Triangles.Add(index + 1); // v2
+            m_Triangles.Add(index + 1); // v2
+            m_Triangles.Add(index + 2); // v3
+            m_Triangles.Add(index + 3); // v4
+        }
+
+        public void AddQuadUnperturbed(Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4)
+        {
+            var index = m_Vertices.Count;
+            m_Vertices.Add(v1);
+            m_Vertices.Add(v2);
+            m_Vertices.Add(v3);
+            m_Vertices.Add(v4);
             m_Triangles.Add(index); // v1
             m_Triangles.Add(index + 2); // v3
             m_Triangles.Add(index + 1); // v2
