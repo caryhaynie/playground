@@ -5,11 +5,13 @@ using UnityEngine;
 namespace PlayfulSoftware.HexMaps.Hybrid
 {
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
+    [DisallowMultipleComponent]
     public sealed class HexMesh : MonoBehaviour
     {
         public bool useCollider;
         public bool useColors;
         public bool useUVCoordinates;
+        public bool useUV2Coordinates;
 
         Mesh m_HexMesh;
         MeshCollider m_MeshCollider;
@@ -18,6 +20,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         [NonSerialized] private List<int> m_Triangles;
         [NonSerialized] private List<Color> m_Colors;
         [NonSerialized] private List<Vector2> m_UVs;
+        [NonSerialized] private List<Vector2> m_UV2s;
 
         void Awake()
         {
@@ -42,6 +45,12 @@ namespace PlayfulSoftware.HexMaps.Hybrid
                 m_HexMesh.SetUVs(0, m_UVs);
                 ListPool<Vector2>.Add(m_UVs);
             }
+
+            if (useUV2Coordinates)
+            {
+                m_HexMesh.SetUVs(1, m_UV2s);
+                ListPool<Vector2>.Add(m_UV2s);
+            }
             m_HexMesh.SetTriangles(m_Triangles, 0);
             ListPool<int>.Add(m_Triangles);
             m_HexMesh.RecalculateNormals();
@@ -58,6 +67,8 @@ namespace PlayfulSoftware.HexMaps.Hybrid
                 m_Colors = ListPool<Color>.Get();
             if (useUVCoordinates)
                 m_UVs = ListPool<Vector2>.Get();
+            if (useUV2Coordinates)
+                m_UV2s = ListPool<Vector2>.Get();
         }
 
         public void AddQuad(Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4)
@@ -67,6 +78,21 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             m_Vertices.Add(HexMetrics.Perturb(v2));
             m_Vertices.Add(HexMetrics.Perturb(v3));
             m_Vertices.Add(HexMetrics.Perturb(v4));
+            m_Triangles.Add(index); // v1
+            m_Triangles.Add(index + 2); // v3
+            m_Triangles.Add(index + 1); // v2
+            m_Triangles.Add(index + 1); // v2
+            m_Triangles.Add(index + 2); // v3
+            m_Triangles.Add(index + 3); // v4
+        }
+
+        public void AddQuadUnperturbed(Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4)
+        {
+            var index = m_Vertices.Count;
+            m_Vertices.Add(v1);
+            m_Vertices.Add(v2);
+            m_Vertices.Add(v3);
+            m_Vertices.Add(v4);
             m_Triangles.Add(index); // v1
             m_Triangles.Add(index + 2); // v3
             m_Triangles.Add(index + 1); // v2
@@ -153,6 +179,34 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         public void AddQuadUV(float uMin, float uMax, float vMin, float vMax)
         {
             AddQuadUV(
+                new Vector2(uMin, vMin),
+                new Vector2(uMax, vMin),
+                new Vector2(uMin, vMax),
+                new Vector2(uMax, vMax));
+        }
+
+        public void AddTriangleUV2(Vector2 uv1, Vector2 uv2, Vector2 uv3)
+        {
+            if (!useUV2Coordinates)
+                return;
+            m_UV2s.Add(uv1);
+            m_UV2s.Add(uv2);
+            m_UV2s.Add(uv3);
+        }
+
+        public void AddQuadUV2(Vector2 uv1, Vector2 uv2, Vector2 uv3, Vector2 uv4)
+        {
+            if (!useUV2Coordinates)
+                return;
+            m_UV2s.Add(uv1);
+            m_UV2s.Add(uv2);
+            m_UV2s.Add(uv3);
+            m_UV2s.Add(uv4);
+        }
+
+        public void AddQuadUV2(float uMin, float uMax, float vMin, float vMax)
+        {
+            AddQuadUV2(
                 new Vector2(uMin, vMin),
                 new Vector2(uMax, vMin),
                 new Vector2(uMin, vMax),

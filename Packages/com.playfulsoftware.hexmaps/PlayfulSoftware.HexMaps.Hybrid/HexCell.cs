@@ -12,6 +12,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         [SerializeField] int m_Elevation = Int32.MinValue;
         bool m_HasIncomingRiver, m_HasOutgoingRiver;
         HexDirection m_IncomingRiver, m_OutgoingRiver;
+        [SerializeField] int m_WaterLevel;
 
         public HexCoordinates coordinates;
         [HideInInspector] public HexGridChunk chunk;
@@ -64,6 +65,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         public bool hasIncomingRiver => m_HasIncomingRiver;
         public bool hasOutgoingRiver => m_HasOutgoingRiver;
         public HexDirection incomingRiver => m_IncomingRiver;
+        public bool isUnderWater => m_WaterLevel > m_Elevation;
         public HexDirection outgoingRiver => m_OutgoingRiver;
 
         public bool hasRiver => hasIncomingRiver || hasOutgoingRiver;
@@ -73,8 +75,23 @@ namespace PlayfulSoftware.HexMaps.Hybrid
 
         public HexDirection riverBeginOrEndDirection => hasIncomingRiver ? incomingRiver : outgoingRiver;
 
-        public float riverSurfaceY => (elevation + HexMetrics.riverSurfaceElevationOffset) * HexMetrics.elevationStep;
+        public float riverSurfaceY => (elevation + HexMetrics.waterSurfaceElevationOffset) * HexMetrics.elevationStep;
         public float streamBedY => (elevation + HexMetrics.streamBedElevationOffset) * HexMetrics.elevationStep;
+
+        public int waterLevel
+        {
+            get => m_WaterLevel;
+            set
+            {
+                if (m_WaterLevel == value)
+                    return;
+                m_WaterLevel = value;
+                RemoveRiversIfInvalid();
+                Refresh();
+            }
+        }
+
+        public float waterSurfaceY => (waterLevel + HexMetrics.waterSurfaceElevationOffset) * HexMetrics.elevationStep;
 
 #if UNITY_EDITOR
         void Reset()
@@ -133,6 +150,9 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         }
 
         public bool HasRoadThroughEdge(HexDirection dir) => m_Roads[(int) dir];
+
+        bool IsValidRiverDestination(HexCell neighbor) =>
+            neighbor && (elevation >= neighbor.elevation || waterLevel == neighbor.elevation);
 
         public void RemoveIncomingRiver()
         {
@@ -224,7 +244,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             var neighbor = GetNeighbor(dir);
             // rivers can't flow up-hill, so bail if neighbor elevation is higher
             // than us.
-            if (!neighbor || elevation < neighbor.elevation)
+            if (!IsValidRiverDestination(neighbor))
                 return;
 
             // remove the old outgoing river, if it exists.
