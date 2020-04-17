@@ -7,6 +7,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         private HexCell[] m_Cells;
         private Canvas m_GridCanvas;
 
+        public HexMesh estuaries;
         public HexMesh terrain;
         public HexMesh rivers;
         public HexMesh roads;
@@ -62,6 +63,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         {
             if (!terrain)
                 return;
+            estuaries.Clear();
             terrain.Clear();
             rivers.Clear();
             roads.Clear();
@@ -71,6 +73,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             {
                 Triangulate(m_Cells[i]);
             }
+            estuaries.Apply();
             terrain.Apply();
             rivers.Apply();
             roads.Apply();
@@ -444,6 +447,54 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             TriangulateEdgeStrip(e2, c2, end, endCell.color, hasRoad);
         }
 
+        void TriangulateEstuary(EdgeVertices e1, EdgeVertices e2, bool incomingRiver)
+        {
+            waterShore.AddTriangle(e2.v1, e1.v2, e1.v1);
+            waterShore.AddTriangle(e2.v5, e1.v5, e1.v4);
+            waterShore.AddTriangleUV(new Vector2(0f, 1f),
+                new Vector2(0f, 0f),
+                new Vector2(0f, 0f));
+            waterShore.AddTriangleUV(new Vector2(0f, 1f),
+                new Vector2(0f, 0f),
+                new Vector2(0f, 0f));
+
+            estuaries.AddQuad(e2.v1, e1.v2, e2.v2, e1.v3);
+            estuaries.AddTriangle(e1.v3, e2.v2, e2.v4);
+            estuaries.AddQuad(e1.v3, e1.v4, e2.v4, e2.v5);
+
+            estuaries.AddQuadUV(
+                new Vector2(0f, 1f), new Vector2(0f, 0f),
+                new Vector2(1f, 1f), new Vector2(0f, 0f));
+            estuaries.AddTriangleUV(
+                new Vector2(0f, 0f), new Vector2(0f, 01), new Vector2(0f, 1f));
+            estuaries.AddQuadUV(
+                new Vector2(0f, 0f), new Vector2(0f, 0f),
+                new Vector2(1f, 1f), new Vector2(0f, 1f));
+
+            if (incomingRiver)
+            {
+                estuaries.AddQuadUV2(
+                    new Vector2(1.5f, 1f), new Vector2(0.7f, 1.15f),
+                    new Vector2(1f, 0.8f), new Vector2(0.5f, 1.1f));
+                estuaries.AddTriangleUV2(
+                    new Vector2(0.5f, 1.1f), new Vector2(1f, 0.8f), new Vector2(0f, 0.8f));
+                estuaries.AddQuadUV2(
+                    new Vector2(0.5f, 1.1f), new Vector2(0.3f, 1.15f),
+                    new Vector2(0f, 0.8f), new Vector2(-0.5f, 1f));
+            }
+            else
+            {
+                estuaries.AddQuadUV2(
+                    new Vector2(-0.5f, -0.2f), new Vector2(0.3f, -0.35f),
+                    new Vector2(0f, 0.8f), new Vector2(0.5f, -0.3f));
+                estuaries.AddTriangleUV2(
+                    new Vector2(0.5f, -0.3f), new Vector2(0f, 0f), new Vector2(1f, 0f));
+                estuaries.AddQuadUV2(
+                    new Vector2(0.5f, -0.3f), new Vector2(0.7f, -0.35f),
+                    new Vector2(1f, 0f), new Vector2(1.5f,  -0.2f));
+            }
+        }
+
         void TriangulateRiverQuad(Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4, float y1, float y2, float v, bool reversed)
         {
             v1.y = v2.y = y1;
@@ -636,14 +687,19 @@ namespace PlayfulSoftware.HexMaps.Hybrid
                 center2 + HexMetrics.GetSecondSolidCorner(dir.Opposite()),
                 center2 + HexMetrics.GetFirstSolidCorner(dir.Opposite()));
 
-            waterShore.AddQuad(e1.v1, e1.v2, e2.v1, e2.v2);
-            waterShore.AddQuad(e1.v2, e1.v3, e2.v2, e2.v3);
-            waterShore.AddQuad(e1.v3, e1.v4, e2.v3, e2.v4);
-            waterShore.AddQuad(e1.v4, e1.v5, e2.v4, e2.v5);
-            waterShore.AddQuadUV(0f, 0f, 0f, 1f);
-            waterShore.AddQuadUV(0f, 0f, 0f, 1f);
-            waterShore.AddQuadUV(0f, 0f, 0f, 1f);
-            waterShore.AddQuadUV(0f, 0f, 0f, 1f);
+            if (cell.HasRiverThroughEdge(dir))
+                TriangulateEstuary(e1, e2, cell.incomingRiver == dir);
+            else
+            {
+                waterShore.AddQuad(e1.v1, e1.v2, e2.v1, e2.v2);
+                waterShore.AddQuad(e1.v2, e1.v3, e2.v2, e2.v3);
+                waterShore.AddQuad(e1.v3, e1.v4, e2.v3, e2.v4);
+                waterShore.AddQuad(e1.v4, e1.v5, e2.v4, e2.v5);
+                waterShore.AddQuadUV(0f, 0f, 0f, 1f);
+                waterShore.AddQuadUV(0f, 0f, 0f, 1f);
+                waterShore.AddQuadUV(0f, 0f, 0f, 1f);
+                waterShore.AddQuadUV(0f, 0f, 0f, 1f);
+            }
 
             var nextNeighbor = cell.GetNeighbor(dir.Next());
             if (nextNeighbor)

@@ -86,6 +86,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
                 if (m_WaterLevel == value)
                     return;
                 m_WaterLevel = value;
+                RemoveRiversIfInvalid();
                 Refresh();
             }
         }
@@ -149,6 +150,9 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         }
 
         public bool HasRoadThroughEdge(HexDirection dir) => m_Roads[(int) dir];
+
+        bool IsValidRiverDestination(HexCell neighbor) =>
+            neighbor && (elevation >= neighbor.elevation || waterLevel == neighbor.elevation);
 
         public void RemoveIncomingRiver()
         {
@@ -240,7 +244,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             var neighbor = GetNeighbor(dir);
             // rivers can't flow up-hill, so bail if neighbor elevation is higher
             // than us.
-            if (!neighbor || elevation < neighbor.elevation)
+            if (!IsValidRiverDestination(neighbor))
                 return;
 
             // remove the old outgoing river, if it exists.
