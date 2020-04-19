@@ -3,15 +3,38 @@ using UnityEngine;
 
 namespace PlayfulSoftware.HexMaps.Hybrid
 {
+#if UNITY_EDITOR
+    using UnityEditor;
+
+    [CustomPropertyDrawer(typeof(HexCell.RiverState))]
+    class RiverStateDrawer : PropertyDrawer
+    {
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        {
+            var dir = (HexDirection)property.FindPropertyRelative("direction").enumValueIndex;
+            var enabled = property.FindPropertyRelative("exists").boolValue;
+            position = EditorGUI.PrefixLabel(position, label);
+            GUI.Label(position, enabled ? $"{dir}" : "None");
+        }
+    }
+#endif // UNITY_EDITOR
     public sealed class HexCell : MonoBehaviour
     {
+        [Serializable]
+        public struct RiverState
+        {
+            public HexDirection direction;
+            public bool exists;
+        }
+
         [SerializeField] HexCell[] m_Neighbors;
         [SerializeField] bool[] m_Roads;
 
-        Color m_Color;
+        [SerializeField] Color m_Color;
         [SerializeField] int m_Elevation = Int32.MinValue;
-        bool m_HasIncomingRiver, m_HasOutgoingRiver;
-        HexDirection m_IncomingRiver, m_OutgoingRiver;
+        [SerializeField] RiverState m_IncomingRiver;
+        [SerializeField] RiverState m_OutgoingRiver;
+        [SerializeField] int m_UrbanLevel;
         [SerializeField] int m_WaterLevel;
 
         public HexCoordinates coordinates;
@@ -62,11 +85,11 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             }
         }
 
-        public bool hasIncomingRiver => m_HasIncomingRiver;
-        public bool hasOutgoingRiver => m_HasOutgoingRiver;
-        public HexDirection incomingRiver => m_IncomingRiver;
+        public bool hasIncomingRiver => m_IncomingRiver.exists;
+        public bool hasOutgoingRiver => m_OutgoingRiver.exists;
+        public HexDirection incomingRiver => m_IncomingRiver.direction;
         public bool isUnderWater => m_WaterLevel > m_Elevation;
-        public HexDirection outgoingRiver => m_OutgoingRiver;
+        public HexDirection outgoingRiver => m_OutgoingRiver.direction;
 
         public bool hasRiver => hasIncomingRiver || hasOutgoingRiver;
         public bool hasRiverBeginOrEnd => hasIncomingRiver != hasOutgoingRiver;
@@ -77,6 +100,18 @@ namespace PlayfulSoftware.HexMaps.Hybrid
 
         public float riverSurfaceY => (elevation + HexMetrics.waterSurfaceElevationOffset) * HexMetrics.elevationStep;
         public float streamBedY => (elevation + HexMetrics.streamBedElevationOffset) * HexMetrics.elevationStep;
+
+        public int urbanLevel
+        {
+            get => m_UrbanLevel;
+            set
+            {
+                if (m_UrbanLevel == value)
+                    return;
+                m_UrbanLevel = value;
+                RefreshSelfOnly();
+            }
+        }
 
         public int waterLevel
         {
@@ -158,13 +193,13 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         {
             if (!hasIncomingRiver)
                 return;
-            m_HasIncomingRiver = false;
+            m_IncomingRiver.exists = false;
             RefreshSelfOnly();
 
             var neighbor = GetNeighbor(incomingRiver);
             if (neighbor)
             {
-                neighbor.m_HasOutgoingRiver = false;
+                neighbor.m_OutgoingRiver.exists = false;
                 neighbor.RefreshSelfOnly();
             }
         }
@@ -173,13 +208,13 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         {
             if (!hasOutgoingRiver)
                 return;
-            m_HasOutgoingRiver = false;
+            m_OutgoingRiver.exists = false;
             RefreshSelfOnly();
 
             var neighbor = GetNeighbor(outgoingRiver);
             if (neighbor)
             {
-                neighbor.m_HasIncomingRiver = false;
+                neighbor.m_IncomingRiver.exists = false;
                 neighbor.RefreshSelfOnly();
             }
         }
@@ -255,15 +290,15 @@ namespace PlayfulSoftware.HexMaps.Hybrid
                 RemoveIncomingRiver();
 
             // actually update the river state now, and refresh.
-            m_HasOutgoingRiver = true;
-            m_OutgoingRiver = dir;
+            m_OutgoingRiver.exists = true;
+            m_OutgoingRiver.direction = dir;
 
             // update our neighbor too.
             if (!neighbor)
                 return;
             neighbor.RemoveIncomingRiver();
-            neighbor.m_HasIncomingRiver = true;
-            neighbor.m_IncomingRiver = dir.Opposite();
+            neighbor.m_IncomingRiver.exists = true;
+            neighbor.m_IncomingRiver.direction = dir.Opposite();
 
             SetRoad((int)dir, false);
         }

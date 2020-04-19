@@ -14,6 +14,8 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         public HexMesh water;
         public HexMesh waterShore;
 
+        public HexFeatureManager features;
+
         void Awake()
         {
             m_GridCanvas = GetComponentInChildren<Canvas>();
@@ -46,6 +48,16 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             enabled = false;
         }
 
+        bool CanAddFeature(HexCell cell, HexDirection dir)
+        {
+            return !cell.isUnderWater && !cell.HasRoadThroughEdge(dir);
+        }
+
+        bool CanAddFeatureToCenter(HexCell cell)
+        {
+            return !cell.isUnderWater && !cell.hasRiver && !cell.HasRoads;
+        }
+
         Vector2 GetRoadInterpolators(HexDirection dir, HexCell cell)
         {
             if (cell.HasRoadThroughEdge(dir))
@@ -69,16 +81,22 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             roads.Clear();
             water.Clear();
             waterShore.Clear();
-            for (int i = 0; i < m_Cells.Length; i++)
+
+            features.Clear();
+
+            foreach (var cell in m_Cells)
             {
-                Triangulate(m_Cells[i]);
+                Triangulate(cell);
             }
+
             estuaries.Apply();
             terrain.Apply();
             rivers.Apply();
             roads.Apply();
             water.Apply();
             waterShore.Apply();
+
+            features.Apply();
         }
 
         void Triangulate(HexCell cell)
@@ -86,6 +104,10 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++)
             {
                 Triangulate(d, cell);
+            }
+            if (CanAddFeatureToCenter(cell))
+            {
+                features.AddFeature(cell, cell.position);
             }
         }
 
@@ -112,7 +134,16 @@ namespace PlayfulSoftware.HexMaps.Hybrid
                 }
             }
             else
+            {
                 TriangulateWithoutRiver(direction, cell, center, el);
+                if (CanAddFeature(cell, direction))
+                {
+                    // offset the feature slightly from the center towards
+                    // the directional edge.
+                    var pos = (center + el.v1 + el.v5) * (1f / 3f);
+                    features.AddFeature(cell, pos);
+                }
+            }
 
             if (direction <= HexDirection.SE)
                 TriangulateConnection(direction, cell, el);
@@ -150,6 +181,14 @@ namespace PlayfulSoftware.HexMaps.Hybrid
 
             TriangulateEdgeStrip(m, cell.color, e, cell.color);
             TriangulateEdgeFan(center, m, cell.color);
+
+            if (CanAddFeature(cell, dir))
+            {
+                // offset the feature slightly from the center towards
+                // the directional edge.
+                var pos = (center + e.v1 + e.v5) * (1f / 3f);
+                features.AddFeature(cell, pos);
+            }
         }
 
         void TriangulateBoundaryTriangle(
