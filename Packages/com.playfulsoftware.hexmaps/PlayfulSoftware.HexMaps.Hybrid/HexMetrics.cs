@@ -42,7 +42,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             new float[] { 0.4f, 0.6f, 0.8f}
         };
 
-        static HashGrid<Vector2> hashGrid;
+        static HashGrid<HashEntry> hashGrid;
 
         internal static Texture2D noiseSource;
 
@@ -97,7 +97,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             var oldState = Random.state;
 
             Random.InitState(seed);
-            hashGrid = new HashGrid<Vector2>((_) => new Vector2(Random.value, Random.value), seed);
+            hashGrid = new HashGrid<HashEntry>((_) => HashEntry.Create(), seed);
             // re-apply previous random state
             Random.state = oldState;
         }
@@ -110,8 +110,8 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             return position;
         }
 
-        public static Vector2 SampleHashGrid(Vector3 position)
-            => hashGrid?.Sample(position) ?? Vector2.zero;
+        public static HashEntry SampleHashGrid(Vector3 position)
+            => hashGrid?.Sample(position) ?? default(HashEntry);
 
         public static Vector4 SampleNoise(Vector3 position)
         {

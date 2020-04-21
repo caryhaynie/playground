@@ -27,19 +27,26 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             public bool exists;
         }
 
+        public HexCoordinates coordinates;
+
+        [HideInInspector] public HexGridChunk chunk;
+        [HideInInspector] public RectTransform uiRect;
+
         [SerializeField] HexCell[] m_Neighbors;
         [SerializeField] bool[] m_Roads;
 
         [SerializeField] Color m_Color;
         [SerializeField] int m_Elevation = Int32.MinValue;
+
+        [Header("Water")]
+        [SerializeField] int m_WaterLevel;
         [SerializeField] RiverState m_IncomingRiver;
         [SerializeField] RiverState m_OutgoingRiver;
-        [SerializeField] int m_UrbanLevel;
-        [SerializeField] int m_WaterLevel;
 
-        public HexCoordinates coordinates;
-        [HideInInspector] public HexGridChunk chunk;
-        [HideInInspector] public RectTransform uiRect;
+        [Header("Features")]
+        [SerializeField] int m_FarmLevel;
+        [SerializeField] int m_PlantLevel;
+        [SerializeField] int m_UrbanLevel;
 
         public Color color
         {
@@ -100,6 +107,30 @@ namespace PlayfulSoftware.HexMaps.Hybrid
 
         public float riverSurfaceY => (elevation + HexMetrics.waterSurfaceElevationOffset) * HexMetrics.elevationStep;
         public float streamBedY => (elevation + HexMetrics.streamBedElevationOffset) * HexMetrics.elevationStep;
+
+        public int farmLevel
+        {
+            get => m_FarmLevel;
+            set
+            {
+                if (m_FarmLevel == value)
+                    return;
+                m_FarmLevel = value;
+                RefreshSelfOnly();
+            }
+        }
+
+        public int plantLevel
+        {
+            get => m_PlantLevel;
+            set
+            {
+                if (m_PlantLevel == value)
+                    return;
+                m_PlantLevel = value;
+                RefreshSelfOnly();
+            }
+        }
 
         public int urbanLevel
         {

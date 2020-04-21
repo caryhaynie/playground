@@ -507,10 +507,36 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 800b241a00884fe8b1f7cf82a3e70fb2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  urbanPrefabs:
-  - {fileID: 7034933398158008682, guid: db21d91bc076c44a699041f5f39fde1c, type: 3}
-  - {fileID: 7034933398158008682, guid: 92b96f731632744ccb16c4d143e603f2, type: 3}
-  - {fileID: 7034933398158008682, guid: d426feb4692dc40e286f543e0de53ec4, type: 3}
+  farmCollections:
+  - prefabs:
+    - {fileID: 7034933398158008682, guid: b52faad6b4ff7476ca463b0e1f8c9550, type: 3}
+    - {fileID: 7034933398158008682, guid: c8a93f35eb6334e8e95f20e9a1a0ce0c, type: 3}
+  - prefabs:
+    - {fileID: 7034933398158008682, guid: 315f21beac5304ac38212fd872fb06ac, type: 3}
+    - {fileID: 7034933398158008682, guid: eb158f903e41b42c2b51bd16815bd144, type: 3}
+  - prefabs:
+    - {fileID: 7034933398158008682, guid: b2f6c02042ff846b6846d459d957fcdb, type: 3}
+    - {fileID: 7034933398158008682, guid: abf87008597f042a89cf29d09d34d343, type: 3}
+  plantCollections:
+  - prefabs:
+    - {fileID: 7034933398158008682, guid: 5dbe8cc44cdd54f2d8f3099786635c78, type: 3}
+    - {fileID: 7034933398158008682, guid: c1f31c9f7807d465788a339c55c5a0e6, type: 3}
+  - prefabs:
+    - {fileID: 7034933398158008682, guid: ca54f845cd587411780b0a1b15334314, type: 3}
+    - {fileID: 7034933398158008682, guid: 4a68cfc7a170b4d16af4f06c61d82723, type: 3}
+  - prefabs:
+    - {fileID: 7034933398158008682, guid: 37171eb614a7b4970a21eb0dae2c8f98, type: 3}
+    - {fileID: 7034933398158008682, guid: 61b7990ba5cbe47ae83499440031b458, type: 3}
+  urbanCollections:
+  - prefabs:
+    - {fileID: 7034933398158008682, guid: db21d91bc076c44a699041f5f39fde1c, type: 3}
+    - {fileID: 7034933398158008682, guid: 8cafca760bf64491984ae383edecfbf8, type: 3}
+  - prefabs:
+    - {fileID: 7034933398158008682, guid: 92b96f731632744ccb16c4d143e603f2, type: 3}
+    - {fileID: 7034933398158008682, guid: eeb73aa17d38a4d62862f18d85c5a29c, type: 3}
+  - prefabs:
+    - {fileID: 7034933398158008682, guid: d426feb4692dc40e286f543e0de53ec4, type: 3}
+    - {fileID: 7034933398158008682, guid: 292704447c9c74072b03349b00dc39d5, type: 3}
 --- !u!1 &7805341613409183484
 GameObject:
   m_ObjectHideFlags: 0
