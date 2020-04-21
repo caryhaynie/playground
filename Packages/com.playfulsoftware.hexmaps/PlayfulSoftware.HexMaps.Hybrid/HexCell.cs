@@ -21,7 +21,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
     public sealed class HexCell : MonoBehaviour
     {
         [Serializable]
-        public struct RiverState
+        internal struct RiverState
         {
             public HexDirection direction;
             public bool exists;
@@ -39,9 +39,9 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         [SerializeField] int m_Elevation = Int32.MinValue;
 
         [Header("Water")]
-        [SerializeField] int m_WaterLevel;
         [SerializeField] RiverState m_IncomingRiver;
         [SerializeField] RiverState m_OutgoingRiver;
+        [SerializeField] int m_WaterLevel;
 
         [Header("Features")]
         [SerializeField] int m_FarmLevel;
