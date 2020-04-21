@@ -11,13 +11,20 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             Ignore, Yes, No
         }
 
+        struct EditMode
+        {
+            public bool enabled;
+            public int level;
+        }
+
         #region Non-Serialized Fields
         Color m_ActiveColor;
-        int m_ActiveElevation;
-        int m_ActiveWaterLevel;
         bool m_ApplyColor;
-        bool m_ApplyElevation;
-        bool m_ApplyWaterLevel;
+        EditMode m_Elevation;
+        EditMode m_FarmLevel;
+        EditMode m_PlantLevel;
+        EditMode m_UrbanLevel;
+        EditMode m_WaterLevel;
         int m_BrushSize;
         OptionalToggle m_RiverMode = OptionalToggle.Ignore;
         OptionalToggle m_RoadMode = OptionalToggle.Ignore;
@@ -101,10 +108,16 @@ namespace PlayfulSoftware.HexMaps.Hybrid
                 return;
             if (m_ApplyColor)
                 cell.color = m_ActiveColor;
-            if (m_ApplyElevation)
-                cell.elevation = m_ActiveElevation;
-            if (m_ApplyWaterLevel)
-                cell.waterLevel = m_ActiveWaterLevel;
+            if (m_Elevation.enabled)
+                cell.elevation = m_Elevation.level;
+            if (m_FarmLevel.enabled)
+                cell.farmLevel = m_FarmLevel.level;
+            if (m_PlantLevel.enabled)
+                cell.plantLevel = m_PlantLevel.level;
+            if (m_UrbanLevel.enabled)
+                cell.urbanLevel = m_UrbanLevel.level;
+            if (m_WaterLevel.enabled)
+                cell.waterLevel = m_WaterLevel.level;
             if (m_RiverMode == OptionalToggle.No)
                 cell.RemoveRiver();
             if (m_RoadMode == OptionalToggle.No)
@@ -131,12 +144,27 @@ namespace PlayfulSoftware.HexMaps.Hybrid
 
         public void SetApplyElevation(bool toggle)
         {
-            m_ApplyElevation = toggle;
+            m_Elevation.enabled = toggle;
+        }
+
+        public void SetApplyFarmLevel(bool toggle)
+        {
+            m_FarmLevel.enabled = toggle;
+        }
+
+        public void SetApplyPlantLevel(bool toggle)
+        {
+            m_PlantLevel.enabled = toggle;
+        }
+
+        public void SetApplyUrbanLevel(bool toggle)
+        {
+            m_UrbanLevel.enabled = toggle;
         }
 
         public void SetApplyWaterLevel(bool toggle)
         {
-            m_ApplyWaterLevel = toggle;
+            m_WaterLevel.enabled = toggle;
         }
 
         public void SetBrushSize(float brushSize)
@@ -146,7 +174,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
 
         public void SetElevation(float elevation)
         {
-            m_ActiveElevation = (int)elevation;
+            m_Elevation.level = (int)elevation;
         }
 
         public void SetRiverMode(int mode)
@@ -159,9 +187,24 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             m_RoadMode = (OptionalToggle) mode;
         }
 
+        public void SetFarmLevel(float level)
+        {
+            m_FarmLevel.level = (int) level;
+        }
+
+        public void SetPlantLevel(float level)
+        {
+            m_PlantLevel.level = (int) level;
+        }
+
+        public void SetUrbanLevel(float level)
+        {
+            m_UrbanLevel.level = (int) level;
+        }
+
         public void SetWaterLevel(float level)
         {
-            m_ActiveWaterLevel = (int)level;
+            m_WaterLevel.level = (int)level;
         }
 
         public void ShowUI(bool visible)

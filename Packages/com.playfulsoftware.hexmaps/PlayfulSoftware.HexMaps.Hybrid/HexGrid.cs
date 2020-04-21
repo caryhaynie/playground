@@ -22,6 +22,8 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         [SerializeField]
         private Texture2D m_NoiseSource;
 
+        public int seed;
+
         private HexCell[] m_Cells;
         private HexGridChunk[] m_Chunks;
 
@@ -54,6 +56,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         void Awake()
         {
             HexMetrics.noiseSource = m_NoiseSource;
+            HexMetrics.InitializeHashGrid(seed);
 
             m_CellCountX = m_ChunkCountX * HexMetrics.chunkSizeX;
             m_CellCountZ = m_ChunkCountZ * HexMetrics.chunkSizeZ;
@@ -149,7 +152,11 @@ namespace PlayfulSoftware.HexMaps.Hybrid
 
         void OnEnable()
         {
-            HexMetrics.noiseSource = m_NoiseSource;
+            if (!HexMetrics.noiseSource)
+            {
+                HexMetrics.noiseSource = m_NoiseSource;
+                HexMetrics.InitializeHashGrid(seed);
+            }
         }
 
         void Reset()
@@ -165,7 +172,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         {
             position = transform.InverseTransformPoint(position);
             var coordinates = HexCoordinates.FromPosition(position);
-            int index = coordinates.x + coordinates.z * cellCountX + coordinates.z / 2;
+            var index = coordinates.x + coordinates.z * cellCountX + coordinates.z / 2;
             //Debug.LogFormat("touched at {0} (index: {1})", coordinates, index);
             return m_Cells[index];
         }

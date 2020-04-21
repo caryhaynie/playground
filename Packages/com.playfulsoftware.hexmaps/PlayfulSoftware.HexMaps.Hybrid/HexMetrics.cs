@@ -5,7 +5,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
     public static class HexMetrics
     {
         public const float blendFactor = 1f - solidFactor;
-        public const float cellPerturbStrength = 0f;//4f;
+        public const float cellPerturbStrength = 4f;
         public const int chunkSizeX = 5, chunkSizeZ = 5;
         public const float elevationPerturbStrength = 1.5f;
         public const float elevationStep = 3f;
@@ -35,6 +35,15 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             new Vector3(-innerRadius, 0f,  0.5f * outerRadius) // NW
         };
 
+        private static float[][] featureThresholds =
+        {
+            new float[] { 0f, 0f, 0.4f},
+            new float[] { 0f, 0.4f, 0.6f},
+            new float[] { 0.4f, 0.6f, 0.8f}
+        };
+
+        static HashGrid<HashEntry> hashGrid;
+
         internal static Texture2D noiseSource;
 
         public static Vector3 GetBridge(HexDirection d)
@@ -56,6 +65,9 @@ namespace PlayfulSoftware.HexMaps.Hybrid
                     return HexEdgeType.Cliff;
             }
         }
+
+        public static float[] GetFeatureThresholds(int level)
+            => featureThresholds[level];
 
         public static Vector3 GetFirstCorner(HexDirection d)
             => corners[(int)d];
@@ -79,6 +91,17 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             => (corners[(int) d] + corners[((int)d + 1) % corners.Length])
                    * (0.5f * solidFactor);
 
+        public static void InitializeHashGrid(int seed)
+        {
+            // save off current random state
+            var oldState = Random.state;
+
+            Random.InitState(seed);
+            hashGrid = new HashGrid<HashEntry>((_) => HashEntry.Create(), seed);
+            // re-apply previous random state
+            Random.state = oldState;
+        }
+
         public static Vector3 Perturb(Vector3 position)
         {
             var sample = SampleNoise(position);
@@ -86,6 +109,9 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             position.z += (sample.z * 2f - 1f) * cellPerturbStrength;
             return position;
         }
+
+        public static HashEntry SampleHashGrid(Vector3 position)
+            => hashGrid?.Sample(position) ?? default(HashEntry);
 
         public static Vector4 SampleNoise(Vector3 position)
         {
