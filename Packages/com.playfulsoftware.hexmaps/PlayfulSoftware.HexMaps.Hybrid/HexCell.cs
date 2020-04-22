@@ -47,6 +47,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         [SerializeField] int m_FarmLevel;
         [SerializeField] int m_PlantLevel;
         [SerializeField] int m_UrbanLevel;
+        [SerializeField] bool m_Walled;
 
         public Color color
         {
@@ -158,6 +159,18 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         }
 
         public float waterSurfaceY => (waterLevel + HexMetrics.waterSurfaceElevationOffset) * HexMetrics.elevationStep;
+
+        public bool walled
+        {
+            get => m_Walled;
+            set
+            {
+                if (m_Walled == value)
+                    return;
+                m_Walled = value;
+                Refresh();
+            }
+        }
 
 #if UNITY_EDITOR
         void Reset()

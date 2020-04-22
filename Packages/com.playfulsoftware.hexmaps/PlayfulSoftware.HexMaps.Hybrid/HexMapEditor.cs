@@ -28,6 +28,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         int m_BrushSize;
         OptionalToggle m_RiverMode = OptionalToggle.Ignore;
         OptionalToggle m_RoadMode = OptionalToggle.Ignore;
+        OptionalToggle m_WalledMode = OptionalToggle.Ignore;
         #endregion
 
         #region Drag-related Fields
@@ -122,6 +123,8 @@ namespace PlayfulSoftware.HexMaps.Hybrid
                 cell.RemoveRiver();
             if (m_RoadMode == OptionalToggle.No)
                 cell.RemoveRoads();
+            if (m_WalledMode != OptionalToggle.Ignore)
+                cell.walled = m_WalledMode == OptionalToggle.Yes;
             if (m_IsDrag)
             {
                 var otherCell = cell.GetNeighbor(m_DragDirection.Opposite());
@@ -200,6 +203,11 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         public void SetUrbanLevel(float level)
         {
             m_UrbanLevel.level = (int) level;
+        }
+
+        public void SetWalledMode(int mode)
+        {
+            m_WalledMode = (OptionalToggle) mode;
         }
 
         public void SetWaterLevel(float level)
