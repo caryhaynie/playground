@@ -1,3 +1,5 @@
+#ifndef HEXMAPS_WATER_COMMON_INCLUDED
+#define HEXMAPS_WATER_COMMON_INCLUDED
 float Foam(float shore, float2 worldXZ, sampler2D noiseTex)
 {
     float2 noiseUV = worldXZ * _Time.y + 0.25;
@@ -48,3 +50,4 @@ float Waves(float2 worldXZ, sampler2D noiseTex)
                 lerp(noise2.x, noise2.y, blendWave);
     return smoothstep(0.75, 2, waves);
 }
+#endif // HEXMAPS_WATER_COMMON_INCLUDED

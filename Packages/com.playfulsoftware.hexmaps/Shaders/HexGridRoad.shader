@@ -1,4 +1,4 @@
-﻿Shader "Custom/Estuary"
+﻿Shader "Hex Grid/Road"
 {
     Properties
     {
@@ -9,24 +9,39 @@
     }
     SubShader
     {
-        Tags { "RenderType"="Transparent" "Queue" = "Transparent" }
+        Tags { "RenderType"="Opaque" "Queue" = "Geometry+1" "RenderPipeline" = "UniversalPipeline" }
         LOD 200
+        Offset -1, -1
+
+        Pass
+        {
+            HLSLPROGRAM
+            #pragma vertex RoadVertex
+            #pragma fragment RoadFragment
+
+            void RoadVertex() {}
+            void RoadFragment() {}
+            ENDHLSL
+        }
+    }
+    SubShader
+    {
+        Tags { "RenderType"="Opaque" "Queue" = "Geometry+1" }
+        LOD 200
+        Offset -1, -1
 
         CGPROGRAM
         // Physically based Standard lighting model, and enable shadows on all light types
-        #pragma surface surf Standard alpha vertex:vert
+        #pragma surface surf Standard fullforwardshadows decal:blend
 
         // Use shader model 3.0 target, to get nicer looking lighting
         #pragma target 3.0
-
-        #include "Water.cginc"
 
         sampler2D _MainTex;
 
         struct Input
         {
             float2 uv_MainTex;
-            float2 riverUV;
             float3 worldPos;
         };
 
@@ -41,32 +56,19 @@
             // put more per-instance properties here
         UNITY_INSTANCING_BUFFER_END(Props)
 
-        void vert(inout appdata_full v, out Input o)
-        {
-            UNITY_INITIALIZE_OUTPUT(Input, o);
-            o.riverUV = v.texcoord1.xy;
-        }
-
         void surf (Input IN, inout SurfaceOutputStandard o)
         {
-            float shore = IN.uv_MainTex.y;
-            shore = sqrt(shore) * 0.9;
+            float4 noise = tex2D(_MainTex, IN.worldPos.xz * 0.0025);
+            fixed4 c = _Color * (noise.y * 0.75 + 0.25);
+            float4 blend = IN.uv_MainTex.x;
+            blend *= noise.x + 0.5;
+            blend = smoothstep(0.4, 0.7, blend);
 
-            float foam = Foam(shore, IN.worldPos.xz, _MainTex);
-            float waves = Waves(IN.worldPos.xz, _MainTex);
-            waves *= 1 - shore;
-
-            float shoreWater = max(foam, waves);
-            float river = River(IN.riverUV, _MainTex);
-            float water = lerp(shoreWater, river, IN.uv_MainTex.x);
-
-            // Albedo comes from a texture tinted by color
-            fixed4 c = saturate(_Color + water);
             o.Albedo = c.rgb;
             // Metallic and smoothness come from slider variables
             o.Metallic = _Metallic;
             o.Smoothness = _Glossiness;
-            o.Alpha = c.a;
+            o.Alpha = blend;
         }
         ENDCG
     }

@@ -1,4 +1,4 @@
-﻿Shader "Custom/Road"
+﻿Shader "Hex Grid/Terrain"
 {
     Properties
     {
@@ -9,25 +9,39 @@
     }
     SubShader
     {
-        Tags { "RenderType"="Opaque" "Queue" = "Geometry+1" }
+        Tags { "RenderType" = "Opaque" "RenderPipeline" = "UniversalPipeline" }
         LOD 200
-        Offset -1, -1
+
+        Pass
+        {
+            HLSLPROGRAM
+            #pragma vertex TerrainVertex
+            #pragma fragment TerrainFragment
+
+            #include "../ShaderLibrary/TerrainInput.hlsl"
+            #include "../ShaderLibrary/TerrainPass.hlsl"
+            ENDHLSL
+        }
+    }
+    SubShader
+    {
+        Tags { "RenderType"="Opaque" }
+        LOD 200
 
         CGPROGRAM
         // Physically based Standard lighting model, and enable shadows on all light types
-        #pragma surface surf Standard fullforwardshadows decal:blend
+        #pragma surface surf Standard fullforwardshadows
 
         // Use shader model 3.0 target, to get nicer looking lighting
         #pragma target 3.0
 
-        sampler2D _MainTex;
-
         struct Input
         {
             float2 uv_MainTex;
-            float3 worldPos;
+            float4 color : COLOR;
         };
 
+        sampler2D _MainTex;
         half _Glossiness;
         half _Metallic;
         fixed4 _Color;
@@ -41,17 +55,13 @@
 
         void surf (Input IN, inout SurfaceOutputStandard o)
         {
-            float4 noise = tex2D(_MainTex, IN.worldPos.xz * 0.0025);
-            fixed4 c = _Color * (noise.y * 0.75 + 0.25);
-            float4 blend = IN.uv_MainTex.x;
-            blend *= noise.x + 0.5;
-            blend = smoothstep(0.4, 0.7, blend);
-
-            o.Albedo = c.rgb;
+            // Albedo comes from a texture tinted by color
+            fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
+            o.Albedo = c.rgb * IN.color;
             // Metallic and smoothness come from slider variables
             o.Metallic = _Metallic;
             o.Smoothness = _Glossiness;
-            o.Alpha = blend;
+            o.Alpha = c.a;
         }
         ENDCG
     }

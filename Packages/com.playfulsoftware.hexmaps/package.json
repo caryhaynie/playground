@@ -1,14 +1,13 @@
-    {
-    "name": "com.playfulsoftware.hexmaps",
-    "displayName": "Hex Maps",
-    "version": "0.0.1-preview",
-    "unity": "2019.1",
-    "description": "Tools for generating hexagon tile maps",
-    "keywords": [
-        "hex",
-        "mesh",
-        "strategy",
-        "worldbuilding"
-    ],
-    "dependencies": {}
+{
+  "name": "com.playfulsoftware.hexmaps",
+  "displayName": "Hex Maps",
+  "version": "0.0.1-preview",
+  "unity": "2019.3",
+  "description": "Tools for generating hexagon tile maps",
+  "keywords": [
+    "hex",
+    "mesh",
+    "strategy",
+    "worldbuilding"
+  ]
 }
