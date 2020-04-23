@@ -33,7 +33,6 @@ Varyings TerrainVertex(Attributes input)
     float3 positionWS = TransformObjectToWorld(input.positionOS.xyz);
     output.positionCS = TransformWorldToHClip(positionWS);
 
-
     return output;
 }
 
