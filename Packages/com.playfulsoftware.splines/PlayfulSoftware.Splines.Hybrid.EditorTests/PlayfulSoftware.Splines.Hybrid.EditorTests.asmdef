@@ -1,11 +1,13 @@
 {
-    "name": "PlayfulSoftware.Splines.Hybrid.Tests",
+    "name": "PlayfulSoftware.Splines.Hybrid.EditorTests",
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "PlayfulSoftware.Splines.Hybrid"
     ],
-    "includePlatforms": [],
+    "includePlatforms": [
+        "Editor"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": true,
@@ -13,9 +15,7 @@
         "nunit.framework.dll"
     ],
     "autoReferenced": false,
-    "defineConstraints": [
-        "UNITY_INCLUDE_TESTS"
-    ],
+    "defineConstraints": [],
     "versionDefines": [],
     "noEngineReferences": false
 }

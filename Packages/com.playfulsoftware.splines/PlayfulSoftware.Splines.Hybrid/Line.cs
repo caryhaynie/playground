@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace PlayfulSoftwre.Splines.Hybrid
+namespace PlayfulSoftware.Splines.Hybrid
 {
 #if UNITY_EDITOR
     using UnityEditor;

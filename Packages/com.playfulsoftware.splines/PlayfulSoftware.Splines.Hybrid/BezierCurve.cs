@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 
-namespace PlayfulSoftwre.Splines.Hybrid
+namespace PlayfulSoftware.Splines.Hybrid
 {
 #if UNITY_EDITOR
     using UnityEditor;
@@ -29,6 +30,7 @@ namespace PlayfulSoftwre.Splines.Hybrid
             var p0 = ShowPoint(0);
             var p1 = ShowPoint(1);
             var p2 = ShowPoint(2);
+            var p3 = ShowPoint(3);
 
             Handles.color = Color.gray;
             Handles.DrawLine(p0, p1);
@@ -85,7 +87,8 @@ namespace PlayfulSoftwre.Splines.Hybrid
             {
                 new Vector3(1f, 0f, 0f),
                 new Vector3(2f, 0f, 0f),
-                new Vector3(3f, 0f, 0f)
+                new Vector3(3f, 0f, 0f),
+                new Vector3(4f, 0f, 0f),
             };
         }
 
@@ -93,10 +96,35 @@ namespace PlayfulSoftwre.Splines.Hybrid
             => GetVelocity(t).normalized;
 
         public Vector3 GetPoint(float t)
-            => transform.TransformPoint(Bezier.GetPoint(points[0], points[1], points[2], t));
+        {
+            ValidatePointArrayAndThrow();
+            return transform.TransformPoint(
+                Bezier.GetPoint(
+                    points[0],
+                    points[1],
+                    points[2],
+                    points[3], t));
+        }
 
         public Vector3 GetVelocity(float t)
-            => transform.TransformPoint(Bezier.GetFirstDerivative(points[0], points[1], points[2], t))
-               - transform.position;
+        {
+            ValidatePointArrayAndThrow();
+            return transform.TransformPoint(
+                       Bezier.GetFirstDerivative(
+                           points[0],
+                           points[1],
+                           points[2],
+                           points[3],t))
+                   - transform.position;
+        }
+
+        [Conditional("DEVELOPMENT_PLAYER")]
+        private void ValidatePointArrayAndThrow()
+        {
+            if (points == null)
+                throw new Exception("Points array is null");
+            if (points.Length > 4)
+                throw new Exception($"Invalid size of points array. Expected: 4, Actual: {points.Length}");
+        }
     }
 }
