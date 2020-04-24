@@ -247,11 +247,12 @@ MonoBehaviour:
   m_Points:
   - {x: 1, y: 0, z: 0}
   - {x: 2, y: 0, z: -0.8066311}
-  - {x: 2.809848, y: 0, z: 0.36747822}
+  - {x: 3.4728737, y: 0, z: -0.38329017}
   - {x: 4, y: 0, z: 0.75038147}
-  - {x: 5.424862, y: 0, z: 1.2087971}
-  - {x: 6, y: 0, z: 0}
-  - {x: 7, y: 0, z: -0.9450326}
+  - {x: 5.424862, y: 0, z: 3.8147817}
+  - {x: 8.710614, y: 0, z: -1.035686}
+  - {x: 6.030847, y: 0, z: -1.035686}
+  m_Loop: 0
 --- !u!4 &978164075
 Transform:
   m_ObjectHideFlags: 0
@@ -260,7 +261,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 978164073}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0.1, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}

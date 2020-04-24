@@ -64,6 +64,14 @@ namespace PlayfulSoftware.Splines.Hybrid
             if (!m_Spline)
                 return;
 
+            EditorGUI.BeginChangeCheck();
+            var loop = EditorGUILayout.Toggle("Loop", m_Spline.loop);
+            if (EditorGUI.EndChangeCheck())
+            {
+                Undo.RecordObject(m_Spline, "Toggle Loop");
+                EditorUtility.SetDirty(m_Spline);
+                m_Spline.loop = loop;
+            }
             if (m_SelectedIndex >= 0 && m_SelectedIndex < m_Spline.controlPointCount)
             {
                 DrawSelectedPointInspector();
@@ -125,6 +133,9 @@ namespace PlayfulSoftware.Splines.Hybrid
                 throw new IndexOutOfRangeException();
             var point = m_HandleTransform.TransformPoint(m_Spline.GetControlPoint(index));
             var size = HandleUtility.GetHandleSize(point);
+            // make first point larger for easy identification
+            if (index == 0)
+                size *= 2f;
             Handles.color = modeColors[(int) m_Spline.GetControlPointMode(index)];
             if (Handles.Button(point, m_HandleRotation, handleSize * size, pickSize * size, Handles.DotHandleCap))
             {
@@ -155,9 +166,24 @@ namespace PlayfulSoftware.Splines.Hybrid
     {
         [SerializeField] private BezierControlPointMode[] m_Modes;
         [SerializeField] private Vector3[] m_Points;
+        [SerializeField] private bool m_Loop;
 
         public int controlPointCount => m_Points.Length;
         public int curveCount => (m_Points.Length - 1) / 3;
+
+        public bool loop
+        {
+            get => m_Loop;
+            set
+            {
+                m_Loop = value;
+                if (value)
+                {
+                    m_Modes[m_Modes.Length - 1] = m_Modes[0];
+                    SetControlPoint(0, m_Points[0]);
+                }
+            }
+        }
 
         void Reset()
         {
@@ -189,6 +215,14 @@ namespace PlayfulSoftware.Splines.Hybrid
 
             Array.Resize(ref m_Modes, m_Modes.Length + 1);
             m_Modes[m_Modes.Length - 1] = m_Modes[m_Modes.Length - 2];
+            EnforceMode(m_Points.Length - 4);
+
+            if (m_Loop)
+            {
+                m_Points[m_Points.Length - 1] = m_Points[0];
+                m_Modes[m_Modes.Length - 1] = m_Modes[0];
+                EnforceMode(0);
+            }
         }
 
         public Vector3 GetControlPoint(int index)
@@ -203,10 +237,33 @@ namespace PlayfulSoftware.Splines.Hybrid
             if (index % 3 == 0)
             {
                 var delta = point - m_Points[index];
-                if (index > 0)
-                    m_Points[index - 1] += delta;
-                if (index + 1 < m_Points.Length)
-                    m_Points[index + 1] += delta;
+                if (m_Loop)
+                {
+                    if (index == 0)
+                    {
+                        m_Points[1] += delta;
+                        m_Points[m_Points.Length - 2] += delta;
+                        m_Points[m_Points.Length - 1] = point;
+                    }
+                    else if (index == m_Points.Length - 1)
+                    {
+                        m_Points[0] = point;
+                        m_Points[1] += delta;
+                        m_Points[index - 1] += delta;
+                    }
+                    else
+                    {
+                        m_Points[index - 1] += delta;
+                        m_Points[index + 1] += delta;
+                    }
+                }
+                else
+                {
+                    if (index > 0)
+                        m_Points[index - 1] += delta;
+                    if (index + 1 < m_Points.Length)
+                        m_Points[index + 1] += delta;
+                }
             }
             m_Points[index] = point;
             EnforceMode(index);
@@ -221,29 +278,46 @@ namespace PlayfulSoftware.Splines.Hybrid
         public void SetControlPointMode(int index, BezierControlPointMode mode)
         {
             ValidateModeArrayAndThrow();
-            m_Modes[GetModeIndex(index)] = mode;
+            var modeIndex = GetModeIndex(index);
+            m_Modes[modeIndex] = mode;
+            if (m_Loop)
+            {
+                if (modeIndex == 0)
+                    m_Modes[m_Modes.Length - 1] = mode;
+                else if (modeIndex == m_Modes.Length - 1)
+                    m_Modes[0] = mode;
+            }
             EnforceMode(index);
         }
+
 
         void EnforceMode(int index)
         {
             var modeIndex = GetModeIndex(index);
             var mode = m_Modes[modeIndex];
-            if (mode == BezierControlPointMode.Free
-                || modeIndex == 0
-                || modeIndex == m_Modes.Length - 1)
+            var isFreeMode = mode == BezierControlPointMode.Free;
+            var isAtEnd = !m_Loop && (modeIndex == 0 || modeIndex == m_Modes.Length - 1);
+            if (isFreeMode || isAtEnd)
                 return;
             var middleIndex = modeIndex * 3;
             int fixedIndex = 0, enforcedIndex = 0;
             if (index <= middleIndex)
             {
                 fixedIndex = middleIndex - 1;
+                if (fixedIndex < 0)
+                    fixedIndex = m_Points.Length - 2;
                 enforcedIndex = middleIndex + 1;
+                if (enforcedIndex >= m_Points.Length)
+                    enforcedIndex = 1;
             }
             else
             {
                 fixedIndex = middleIndex + 1;
+                if (fixedIndex >= m_Points.Length)
+                    fixedIndex = 1;
                 enforcedIndex = middleIndex - 1;
+                if (enforcedIndex < 0)
+                    enforcedIndex = m_Points.Length - 2;
             }
 
             var middle = m_Points[middleIndex];
