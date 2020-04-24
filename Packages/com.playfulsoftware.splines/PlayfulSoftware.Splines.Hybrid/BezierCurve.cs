@@ -15,6 +15,7 @@ namespace PlayfulSoftware.Splines.Hybrid
         Quaternion m_HandleRotation;
         Transform m_HandleTransform;
 
+        const float directionScale = 0.5f;
         const int lineSteps = 10;
 
         void OnSceneGUI()
@@ -34,27 +35,28 @@ namespace PlayfulSoftware.Splines.Hybrid
 
             Handles.color = Color.gray;
             Handles.DrawLine(p0, p1);
-            Handles.DrawLine(p1, p2);
+            Handles.DrawLine(p2, p3);
 
-            Handles.color = Color.white;
-            var lineStart = m_Curve.GetPoint(0f);
-            Handles.color = Color.green;
-            Handles.DrawLine(lineStart, lineStart + m_Curve.GetDirection(0f));
-            foreach (var t in GetStepPoints())
-            {
-                var lineEnd = m_Curve.GetPoint(t);
-                Handles.color = Color.white;
-                Handles.DrawLine(lineStart, lineEnd);
-                Handles.color = Color.green;
-                Handles.DrawLine(lineEnd, lineEnd + m_Curve.GetDirection(t));
-                lineStart = lineEnd;
-            }
+            Handles.DrawBezier(p0, p3, p1, p2, Color.white, null, 2f);
+            ShowDirections();
         }
 
         IEnumerable<float> GetStepPoints()
         {
             for (var i = 0; i <= lineSteps; i++)
                 yield return i / (float) lineSteps;
+        }
+
+        void ShowDirections()
+        {
+            var point = m_Curve.GetPoint(0f);
+            Handles.color = Color.green;
+            Handles.DrawLine(point, point + m_Curve.GetDirection(0f) * directionScale);
+            foreach (var t in GetStepPoints())
+            {
+                point = m_Curve.GetPoint(t);
+                Handles.DrawLine(point, point + m_Curve.GetDirection(t) * directionScale);
+            }
         }
 
         Vector3 ShowPoint(int index)
@@ -118,7 +120,7 @@ namespace PlayfulSoftware.Splines.Hybrid
                    - transform.position;
         }
 
-        [Conditional("DEVELOPMENT_PLAYER")]
+        [Conditional("DEBUG")]
         private void ValidatePointArrayAndThrow()
         {
             if (points == null)
