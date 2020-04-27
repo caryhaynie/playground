@@ -31,6 +31,21 @@ float River(float2 riverUV, sampler2D noiseTex)
     return noise.x * noise2.w;
 }
 
+float RiverUniversal(float2 riverUV, TEXTURE2D_PARAM(noiseTex, sampler_noiseTex))
+{
+    float2 uv = riverUV;
+    uv.x = uv.x * 0.0625 + _Time.y * 0.005;
+    uv.y -= _Time.y * 0.25;
+    float4 noise = SAMPLE_TEXTURE2D(noiseTex, sampler_noiseTex, uv);
+
+    float2 uv2 = riverUV;
+    uv2.x = uv2.x * 0.0625 - _Time.y * 0.0052;
+    uv.y -= _Time.y * 0.23;
+    float4 noise2 = SAMPLE_TEXTURE2D(noiseTex, sampler_noiseTex, uv2);
+
+    return noise.x * noise2.w;
+}
+
 float Waves(float2 worldXZ, sampler2D noiseTex)
 {
     float2 uv1 = worldXZ;

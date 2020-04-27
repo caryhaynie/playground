@@ -1,11 +1,28 @@
-﻿Shader "Custom/River"
+﻿Shader "Hex Grid/River"
 {
     Properties
     {
         _Color ("Color", Color) = (1,1,1,1)
-        _MainTex ("Albedo (RGB)", 2D) = "white" {}
+        _NoiseTex ("Albedo (RGB)", 2D) = "white" {}
         _Glossiness ("Smoothness", Range(0,1)) = 0.5
         _Metallic ("Metallic", Range(0,1)) = 0.0
+    }
+    SubShader
+    {
+        Tags { "RenderType"="Transparent" "Queue" = "Transparent+1" "RenderPipeline" = "UniversalPipeline" }
+        LOD 200
+
+        Pass
+        {
+            HLSLPROGRAM
+            #pragma vertex RiverVertex
+            #pragma fragment RiverFragment
+
+            #include "../ShaderLibrary/RiverInput.hlsl"
+            #include "../ShaderLibrary/RiverPass.hlsl"
+
+            ENDHLSL
+        }
     }
     SubShader
     {
@@ -19,9 +36,9 @@
         // Use shader model 3.0 target, to get nicer looking lighting
         #pragma target 3.0
 
-        #include "Water.cginc"
+        #include "../ShaderLibrary/WaterCommon.hlsl"
 
-        sampler2D _MainTex;
+        sampler2D _NoiseTex;
 
         struct Input
         {
@@ -41,7 +58,7 @@
 
         void surf (Input IN, inout SurfaceOutputStandard o)
         {
-            float river = River(IN.uv_MainTex, _MainTex);
+            float river = River(IN.uv_MainTex, _NoiseTex);
 
             // Albedo comes from a texture tinted by color
             fixed4 c = saturate(_Color + river);

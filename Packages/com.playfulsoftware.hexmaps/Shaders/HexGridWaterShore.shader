@@ -9,6 +9,23 @@
     }
     SubShader
     {
+        Tags { "RenderType"="Transparent" "Queue" = "Transparent" "RenderPipeline" = "UniversalPipeline" }
+        LOD 200
+
+        Pass
+        {
+            HLSLPROGRAM
+            #pragma vertex WaterShoreVertex
+            #pragma fragment WaterShoreFragment
+
+            void WaterShoreVertex() {}
+
+            void WaterShoreFragment() {}
+            ENDHLSL
+        }
+    }
+    SubShader
+    {
         Tags { "RenderType"="Transparent" "Queue" = "Transparent" }
         LOD 200
 
@@ -19,7 +36,7 @@
         // Use shader model 3.0 target, to get nicer looking lighting
         #pragma target 3.0
 
-        #include "Water.cginc"
+        #include "../ShaderLibrary/WaterCommon.hlsl"
 
         sampler2D _MainTex;
 
