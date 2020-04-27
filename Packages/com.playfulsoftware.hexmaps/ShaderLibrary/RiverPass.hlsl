@@ -2,7 +2,7 @@
 #define HEXMAPS_RIVER_PASS_INCLUDED
 
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
-#include "WaterCommon.hlsl"
+#include "WaterUniversal.hlsl"
 
 struct Attributes
 {
@@ -43,7 +43,7 @@ float4 RiverFragment(Varyings input) : SV_TARGET
     UNITY_SETUP_INSTANCE_ID(input);
     UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
 
-    float river = RiverUniversal(input.uv, TEXTURE2D_ARGS(_NoiseTex, sampler_NoiseTex));
+    float river = River(input.uv, TEXTURE2D_ARGS(_NoiseTex, sampler_NoiseTex));
 
     return saturate(_Color + river);
 }

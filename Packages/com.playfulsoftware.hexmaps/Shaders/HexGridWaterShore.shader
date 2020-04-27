@@ -1,4 +1,4 @@
-﻿Shader "Custom/WaterShore"
+﻿Shader "Hex Grid/WaterShore"
 {
     Properties
     {
@@ -36,7 +36,7 @@
         // Use shader model 3.0 target, to get nicer looking lighting
         #pragma target 3.0
 
-        #include "../ShaderLibrary/WaterCommon.hlsl"
+        #include "../ShaderLibrary/WaterLegacy.hlsl"
 
         sampler2D _MainTex;
 
