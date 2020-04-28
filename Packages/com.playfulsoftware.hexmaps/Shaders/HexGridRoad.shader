@@ -9,7 +9,7 @@
     }
     SubShader
     {
-        Tags { "RenderType"="Opaque" "Queue" = "Geometry+1" "RenderPipeline" = "UniversalPipeline" }
+        Tags { "RenderType"="Opaque" "Queue" = "Geometry+1" "RenderPipeline" = "UniversalPipeline" "IgnoreProjector" = "True" }
         LOD 200
         Offset -1, -1
 

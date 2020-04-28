@@ -3,24 +3,27 @@
     Properties
     {
         _Color ("Color", Color) = (1,1,1,1)
-        _MainTex ("Albedo (RGB)", 2D) = "white" {}
+        _NoiseTex ("Noise Texture", 2D) = "white" {}
         _Glossiness ("Smoothness", Range(0,1)) = 0.5
         _Metallic ("Metallic", Range(0,1)) = 0.0
     }
     SubShader
     {
-        Tags { "RenderType"="Transparent" "Queue" = "Transparent" "RenderPipeline" = "UniversalPipeline" }
+        Tags { "RenderType"="Transparent" "Queue" = "Transparent" "RenderPipeline" = "UniversalPipeline" "IgnoreProjector" = "True"}
         LOD 200
 
         Pass
         {
+            Name "WaterForward"
+            Tags { "LightMode" = "UniversalForward" }
+
             HLSLPROGRAM
             #pragma vertex WaterVertex
             #pragma fragment WaterFragment
 
-            void WaterVertex() {}
+            #include "../ShaderLibrary/WaterInput.hlsl"
+            #include "../ShaderLibrary/WaterForwardPass.hlsl"
 
-            void WaterFragment() {}
             ENDHLSL
         }
     }
@@ -38,7 +41,7 @@
 
         #include "../ShaderLibrary/WaterLegacy.hlsl"
 
-        sampler2D _MainTex;
+        sampler2D _NoiseTex;
 
         struct Input
         {
@@ -59,7 +62,7 @@
 
         void surf (Input IN, inout SurfaceOutputStandard o)
         {
-            float waves = Waves(IN.worldPos.xz, _MainTex);
+            float waves = Waves(IN.worldPos.xz, _NoiseTex);
 
             // Albedo comes from a texture tinted by color
             fixed4 c = saturate(_Color + waves);

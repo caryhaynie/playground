@@ -15,6 +15,7 @@
         Pass
         {
             Name "RiverForward"
+            Tags { "LightMode" = "UniversalForward" }
 
             HLSLPROGRAM
             #pragma vertex RiverVertex

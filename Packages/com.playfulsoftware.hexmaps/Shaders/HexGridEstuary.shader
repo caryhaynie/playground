@@ -3,18 +3,19 @@
     Properties
     {
         _Color ("Color", Color) = (1,1,1,1)
-        _MainTex ("Albedo (RGB)", 2D) = "white" {}
+        _NoiseTexture ("Noise Texture", 2D) = "white" {}
         [HideInInspector] _Glossiness ("Smoothness", Range(0,1)) = 0.5
         [HideInInspector] _Metallic ("Metallic", Range(0,1)) = 0.0
     }
     SubShader
     {
-        Tags { "RenderType"="Transparent" "Queue" = "Transparent" "RenderPipeline" = "UniversalPipeline" }
+        Tags { "RenderType"="Transparent" "Queue" = "Transparent" "RenderPipeline" = "UniversalPipeline" "IgnoreProjector" = "True" }
         LOD 200
 
         Pass
         {
             Name "EstuaryForward"
+            Tags { "LightMode" = "UniversalForward" }
 
             HLSLPROGRAM
             #pragma vertex EstuaryVertex
@@ -40,7 +41,7 @@
 
         #include "../ShaderLibrary/WaterLegacy.hlsl"
 
-        sampler2D _MainTex;
+        sampler2D _NoiseTexture;
 
         struct Input
         {
@@ -71,12 +72,12 @@
             float shore = IN.uv_MainTex.y;
             shore = sqrt(shore) * 0.9;
 
-            float foam = Foam(shore, IN.worldPos.xz, _MainTex);
-            float waves = Waves(IN.worldPos.xz, _MainTex);
+            float foam = Foam(shore, IN.worldPos.xz, _NoiseTexture);
+            float waves = Waves(IN.worldPos.xz, _NoiseTexture);
             waves *= 1 - shore;
 
             float shoreWater = max(foam, waves);
-            float river = River(IN.riverUV, _MainTex);
+            float river = River(IN.riverUV, _NoiseTexture);
             float water = lerp(shoreWater, river, IN.uv_MainTex.x);
 
             // Albedo comes from a texture tinted by color

@@ -9,11 +9,14 @@
     }
     SubShader
     {
-        Tags { "RenderType"="Transparent" "Queue" = "Transparent" "RenderPipeline" = "UniversalPipeline" }
+        Tags { "RenderType"="Transparent" "Queue" = "Transparent" "RenderPipeline" = "UniversalPipeline" "IgnoreProjector" = "True" }
         LOD 200
 
         Pass
         {
+            Name "WaterShoreForward"
+            Tags { "LightMode" = "UniversalForward" }
+
             HLSLPROGRAM
             #pragma vertex WaterShoreVertex
             #pragma fragment WaterShoreFragment
