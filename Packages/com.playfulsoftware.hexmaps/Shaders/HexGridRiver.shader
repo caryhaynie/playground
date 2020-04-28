@@ -1,33 +1,51 @@
-﻿Shader "Custom/Estuary"
+﻿Shader "Hex Grid/River"
 {
     Properties
     {
         _Color ("Color", Color) = (1,1,1,1)
-        _MainTex ("Albedo (RGB)", 2D) = "white" {}
-        _Glossiness ("Smoothness", Range(0,1)) = 0.5
-        _Metallic ("Metallic", Range(0,1)) = 0.0
+        _NoiseTex ("Noise Texture", 2D) = "white" {}
+        [HideInInspector] _Glossiness ("Smoothness", Range(0,1)) = 0.5
+        [HideInInspector] _Metallic ("Metallic", Range(0,1)) = 0.0
     }
     SubShader
     {
-        Tags { "RenderType"="Transparent" "Queue" = "Transparent" }
+        Tags { "RenderType"="Transparent" "Queue" = "Transparent+1" "RenderPipeline" = "UniversalPipeline" "IgnoreProjector" = "True" }
+        LOD 200
+
+        Pass
+        {
+            Name "RiverForward"
+            Tags { "LightMode" = "UniversalForward" }
+
+            HLSLPROGRAM
+            #pragma vertex RiverVertex
+            #pragma fragment RiverFragment
+
+            #include "../ShaderLibrary/WaterInput.hlsl"
+            #include "../ShaderLibrary/RiverForwardPass.hlsl"
+
+            ENDHLSL
+        }
+    }
+    SubShader
+    {
+        Tags { "RenderType"="Transparent" "Queue" = "Transparent+1" }
         LOD 200
 
         CGPROGRAM
         // Physically based Standard lighting model, and enable shadows on all light types
-        #pragma surface surf Standard alpha vertex:vert
+        #pragma surface surf Standard alpha
 
         // Use shader model 3.0 target, to get nicer looking lighting
         #pragma target 3.0
 
-        #include "Water.cginc"
+        #include "../ShaderLibrary/WaterLegacy.hlsl"
 
-        sampler2D _MainTex;
+        sampler2D _NoiseTex;
 
         struct Input
         {
             float2 uv_MainTex;
-            float2 riverUV;
-            float3 worldPos;
         };
 
         half _Glossiness;
@@ -41,27 +59,12 @@
             // put more per-instance properties here
         UNITY_INSTANCING_BUFFER_END(Props)
 
-        void vert(inout appdata_full v, out Input o)
-        {
-            UNITY_INITIALIZE_OUTPUT(Input, o);
-            o.riverUV = v.texcoord1.xy;
-        }
-
         void surf (Input IN, inout SurfaceOutputStandard o)
         {
-            float shore = IN.uv_MainTex.y;
-            shore = sqrt(shore) * 0.9;
-
-            float foam = Foam(shore, IN.worldPos.xz, _MainTex);
-            float waves = Waves(IN.worldPos.xz, _MainTex);
-            waves *= 1 - shore;
-
-            float shoreWater = max(foam, waves);
-            float river = River(IN.riverUV, _MainTex);
-            float water = lerp(shoreWater, river, IN.uv_MainTex.x);
+            float river = River(IN.uv_MainTex, _NoiseTex);
 
             // Albedo comes from a texture tinted by color
-            fixed4 c = saturate(_Color + water);
+            fixed4 c = saturate(_Color + river);
             o.Albedo = c.rgb;
             // Metallic and smoothness come from slider variables
             o.Metallic = _Metallic;

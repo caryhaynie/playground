@@ -1,11 +1,30 @@
-﻿Shader "Custom/VertexColors"
+﻿Shader "Hex Grid/Terrain"
 {
     Properties
     {
         _Color ("Color", Color) = (1,1,1,1)
         _MainTex ("Albedo (RGB)", 2D) = "white" {}
-        _Glossiness ("Smoothness", Range(0,1)) = 0.5
-        _Metallic ("Metallic", Range(0,1)) = 0.0
+        [HideInInspector] _Glossiness ("Smoothness", Range(0,1)) = 0.5
+        [HideInInspector] _Metallic ("Metallic", Range(0,1)) = 0.0
+    }
+    SubShader
+    {
+        Tags { "RenderType" = "Opaque" "RenderPipeline" = "UniversalPipeline" "IgnoreProjector" = "True"}
+        LOD 200
+
+        Pass
+        {
+            Name "TerrainForward"
+            Tags { "LightMode" = "UniversalForward" }
+
+            HLSLPROGRAM
+            #pragma vertex TerrainVertex
+            #pragma fragment TerrainFragment
+
+            #include "../ShaderLibrary/TerrainInput.hlsl"
+            #include "../ShaderLibrary/TerrainForwardPass.hlsl"
+            ENDHLSL
+        }
     }
     SubShader
     {
