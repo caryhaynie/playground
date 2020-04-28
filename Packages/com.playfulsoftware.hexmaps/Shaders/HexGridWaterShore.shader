@@ -3,9 +3,9 @@
     Properties
     {
         _Color ("Color", Color) = (1,1,1,1)
-        _MainTex ("Albedo (RGB)", 2D) = "white" {}
-        _Glossiness ("Smoothness", Range(0,1)) = 0.5
-        _Metallic ("Metallic", Range(0,1)) = 0.0
+        _NoiseTex ("Noise Texture", 2D) = "white" {}
+        [HideInInspector] _Glossiness ("Smoothness", Range(0,1)) = 0.5
+        [HideInInspector] _Metallic ("Metallic", Range(0,1)) = 0.0
     }
     SubShader
     {
@@ -21,9 +21,9 @@
             #pragma vertex WaterShoreVertex
             #pragma fragment WaterShoreFragment
 
-            void WaterShoreVertex() {}
+            #include "../ShaderLibrary/WaterInput.hlsl"
+            #include "../ShaderLibrary/WaterShoreForwardPass.hlsl"
 
-            void WaterShoreFragment() {}
             ENDHLSL
         }
     }
@@ -41,7 +41,7 @@
 
         #include "../ShaderLibrary/WaterLegacy.hlsl"
 
-        sampler2D _MainTex;
+        sampler2D _NoiseTex;
 
         struct Input
         {
@@ -65,8 +65,8 @@
             float shore = IN.uv_MainTex.y;
             shore = sqrt(shore) * 0.9;
 
-            float foam = Foam(shore, IN.worldPos.xz, _MainTex);
-            float waves = Waves(IN.worldPos.xz, _MainTex);
+            float foam = Foam(shore, IN.worldPos.xz, _NoiseTex);
+            float waves = Waves(IN.worldPos.xz, _NoiseTex);
             waves *= 1 - shore;
 
             // Albedo comes from a texture tinted by color
