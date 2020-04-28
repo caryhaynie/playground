@@ -18,7 +18,7 @@
             #pragma vertex RiverVertex
             #pragma fragment RiverFragment
 
-            #include "../ShaderLibrary/RiverInput.hlsl"
+            #include "../ShaderLibrary/WaterInput.hlsl"
             #include "../ShaderLibrary/RiverPass.hlsl"
 
             ENDHLSL
