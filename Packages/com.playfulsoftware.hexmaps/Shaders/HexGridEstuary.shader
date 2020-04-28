@@ -4,8 +4,8 @@
     {
         _Color ("Color", Color) = (1,1,1,1)
         _MainTex ("Albedo (RGB)", 2D) = "white" {}
-        _Glossiness ("Smoothness", Range(0,1)) = 0.5
-        _Metallic ("Metallic", Range(0,1)) = 0.0
+        [HideInInspector] _Glossiness ("Smoothness", Range(0,1)) = 0.5
+        [HideInInspector] _Metallic ("Metallic", Range(0,1)) = 0.0
     }
     SubShader
     {
@@ -14,13 +14,14 @@
 
         Pass
         {
+            Name "EstuaryForward"
+
             HLSLPROGRAM
             #pragma vertex EstuaryVertex
             #pragma fragment EstuaryFragment
 
-            void EstuaryVertex() {}
-
-            void EstuaryFragment() {}
+            #include "../ShaderLibrary/WaterInput.hlsl"
+            #include "../ShaderLibrary/EstuaryForwardPass.hlsl"
 
             ENDHLSL
         }

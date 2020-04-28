@@ -1,7 +1,5 @@
-#ifndef HEXMAPS_RIVER_PASS_INCLUDED
-#define HEXMAPS_RIVER_PASS_INCLUDED
-
-#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+#ifndef HEXMAPS_ROAD_FORWARD_PASS_INCLUDED
+#define HEXMAPS_ROAD_FORWARD_PASS_INCLUDED
 
 struct Attributes
 {
@@ -21,7 +19,7 @@ struct Varyings
     UNITY_VERTEX_OUTPUT_STEREO
 };
 
-Varyings RiverVertex(Attributes input)
+Varyings RoadVertex(Attributes input)
 {
     Varyings output = (Varyings)0;
 
@@ -37,14 +35,16 @@ Varyings RiverVertex(Attributes input)
     return output;
 }
 
-float4 RiverFragment(Varyings input) : SV_TARGET
+float4 RoadFragment(Varyings input) : SV_TARGET
 {
     UNITY_SETUP_INSTANCE_ID(input);
     UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
 
-    float river = River(input.uv);
+    float4 road = Road(input.uv, input.positionWS);
 
-    return saturate(_Color + river);
+    clip(road.a);
+
+    return road;
 }
 
-#endif // HEXMAPS_RIVER_PASS_INCLUDED
+#endif // HEXMAPS_ROAD_FORWARD_PASS_INCLUDED

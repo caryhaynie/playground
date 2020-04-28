@@ -3,23 +3,25 @@
     Properties
     {
         _Color ("Color", Color) = (1,1,1,1)
-        _NoiseTex ("Albedo (RGB)", 2D) = "white" {}
-        _Glossiness ("Smoothness", Range(0,1)) = 0.5
-        _Metallic ("Metallic", Range(0,1)) = 0.0
+        _NoiseTex ("Noise Texture", 2D) = "white" {}
+        [HideInInspector] _Glossiness ("Smoothness", Range(0,1)) = 0.5
+        [HideInInspector] _Metallic ("Metallic", Range(0,1)) = 0.0
     }
     SubShader
     {
-        Tags { "RenderType"="Transparent" "Queue" = "Transparent+1" "RenderPipeline" = "UniversalPipeline" }
+        Tags { "RenderType"="Transparent" "Queue" = "Transparent+1" "RenderPipeline" = "UniversalPipeline" "IgnoreProjector" = "True" }
         LOD 200
 
         Pass
         {
+            Name "RiverForward"
+
             HLSLPROGRAM
             #pragma vertex RiverVertex
             #pragma fragment RiverFragment
 
             #include "../ShaderLibrary/WaterInput.hlsl"
-            #include "../ShaderLibrary/RiverPass.hlsl"
+            #include "../ShaderLibrary/RiverForwardPass.hlsl"
 
             ENDHLSL
         }

@@ -1,5 +1,5 @@
-#ifndef HEXMAPS_TERRAIN_PASS_INCLUDED
-#define HEXMAPS_TERRAIN_PASS_INCLUDED
+#ifndef HEXMAPS_TERRAIN_FORWARD_PASS_INCLUDED
+#define HEXMAPS_TERRAIN_FORWARD_PASS_INCLUDED
 
 struct Attributes
 {
@@ -43,4 +43,4 @@ float4 TerrainFragment(Varyings input) : SV_TARGET
 
     return _Color * input.color;
 }
-#endif // HEXMAPS_TERRAIN_PASS_INCLUDED
+#endif // HEXMAPS_TERRAIN_FORWARD_PASS_INCLUDED
