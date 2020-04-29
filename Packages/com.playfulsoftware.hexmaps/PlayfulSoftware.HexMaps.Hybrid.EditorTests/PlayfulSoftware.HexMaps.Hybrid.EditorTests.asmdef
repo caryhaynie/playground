@@ -1,11 +1,13 @@
 {
-    "name": "PlayfulSoftware.HexMaps.Hybrid.Tests",
+    "name": "PlayfulSoftware.HexMaps.Hybrid.EditorTests",
     "references": [
         "PlayfulSoftware.HexMaps.Hybrid",
-        "UnityEngine.TestRunner",
-        "UnityEditor.TestRunner"
+        "UnityEditor.TestRunner",
+        "UnityEngine.TestRunner"
     ],
-    "includePlatforms": [],
+    "includePlatforms": [
+        "Editor"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": true,
