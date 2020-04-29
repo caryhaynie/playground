@@ -4,6 +4,7 @@
     {
         _Color ("Color", Color) = (1,1,1,1)
         _MainTex ("Albedo (RGB)", 2D) = "white" {}
+        [Toggle(LIGHTING_ON)] _Lit ("Enabling Lighting", Int) = 0
         [HideInInspector] _Glossiness ("Smoothness", Range(0,1)) = 0.5
         [HideInInspector] _Metallic ("Metallic", Range(0,1)) = 0.0
     }
@@ -18,6 +19,8 @@
             Tags { "LightMode" = "UniversalForward" }
 
             HLSLPROGRAM
+
+            #pragma shader_feature LIGHTING_ON
             #pragma vertex TerrainVertex
             #pragma fragment TerrainFragment
 
