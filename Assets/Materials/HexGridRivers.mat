@@ -8,7 +8,8 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: HexGridRivers
-  m_Shader: {fileID: 4800000, guid: cbb15dc719e584607a13cf891a1ae7f8, type: 3}
+  m_Shader: {fileID: -6465566751694194690, guid: fd1826728c8f74e648df54bc8c925681,
+    type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 1

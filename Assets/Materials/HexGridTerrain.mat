@@ -8,7 +8,8 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: HexGridTerrain
-  m_Shader: {fileID: 4800000, guid: 9a2bbf18f59d747ef8728d033b8e7fae, type: 3}
+  m_Shader: {fileID: -6465566751694194690, guid: 0b63e2481ef704240897be10d3203792,
+    type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 1
@@ -63,6 +64,7 @@ Material:
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
+    - _Lit: 0
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
