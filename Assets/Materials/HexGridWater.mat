@@ -8,7 +8,8 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: HexGridWater
-  m_Shader: {fileID: 4800000, guid: 48fd748f60d344724ad5aae0fceb0e2c, type: 3}
+  m_Shader: {fileID: -6465566751694194690, guid: be2b9a54a3dbb4b0aad38aa2ed5c1e32,
+    type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 1

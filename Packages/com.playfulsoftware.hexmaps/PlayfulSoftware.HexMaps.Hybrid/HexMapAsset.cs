@@ -18,7 +18,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
     }
 #endif // UNITY_EDITOR
     //[CreateAssetMenu(fileName = "HexMap", menuName = "HexMaps/Create Map", order = 0)]
-    public sealed class HexMapAsset : ScriptableObject
+    public sealed partial class HexMapAsset : ScriptableObject
     {
     }
 }

@@ -6,12 +6,12 @@ using UnityEditor;
 
 namespace Tests
 {
-    public class TemporaryAssetPath : IDisposable
+    internal class TemporaryAssetPath : IDisposable
     {
         internal string m_DeleteRoot = null;
-        public string path { get; }
+        internal string path { get; }
 
-        public TemporaryAssetPath(string path)
+        internal TemporaryAssetPath(string path)
         {
             if (string.IsNullOrEmpty(path))
                 throw new ArgumentNullException("path");
