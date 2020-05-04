@@ -1,3 +1,21 @@
-﻿{
-	"name": "PlayfulSoftware.Meshes.Hybrid"
+{
+    "name": "PlayfulSoftware.Meshes.Hybrid",
+    "references": [
+        "Unity.Burst"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.burst",
+            "expression": "1.2.0",
+            "define": "HAS_BURST_1_2_0"
+        }
+    ],
+    "noEngineReferences": false
 }

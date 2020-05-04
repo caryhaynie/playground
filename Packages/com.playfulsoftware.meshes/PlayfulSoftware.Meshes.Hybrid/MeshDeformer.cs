@@ -1,3 +1,6 @@
+#if HAS_BURST_1_2_0
+using Unity.Burst;
+#endif // HAS_BURST_1_2_0
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
@@ -17,11 +20,14 @@ namespace PlayfulSoftware.Meshes.Hybrid
 
         private float m_UniformScale = 1f;
 
+#if HAS_BURST_1_2_0
+        [BurstCompile]
+#endif // HAS_BURST_1_2_0
         private struct ApplyDeformingForceJob : IJobFor
         {
             [ReadOnly]
             public NativeArray<Vector3> Vertices;
-            public NativeArray<Vector3> Velocites;
+            public NativeArray<Vector3> Velocities;
             public Vector3 Point;
             public float Force;
             public float DeltaTime;
@@ -33,10 +39,13 @@ namespace PlayfulSoftware.Meshes.Hybrid
                 pointToVertex *= UniformScale;
                 var attenuatedForce = Force / (1f + pointToVertex.sqrMagnitude);
                 var velocity = attenuatedForce * DeltaTime;
-                Velocites[index] += pointToVertex.normalized * velocity;
+                Velocities[index] += pointToVertex.normalized * velocity;
             }
         }
 
+#if HAS_BURST_1_2_0
+        [BurstCompile]
+#endif // HAS_BURST_1_2_0
         private struct UpdateVerticesJob : IJobFor
         {
             public NativeArray<Vector3> OriginalVertices;
@@ -93,14 +102,15 @@ namespace PlayfulSoftware.Meshes.Hybrid
             job.Run(m_DisplacedVertices.Length);
             m_DeformingMesh.SetVertices(m_DisplacedVertices);
             m_DeformingMesh.RecalculateNormals();
+            m_DeformingMesh.RecalculateBounds();
         }
 
         public void AddDeformingForce(Vector3 point, float force)
         {
-            Debug.DrawLine(Camera.main.transform.position, point);
+            Debug.DrawLine(Camera.main.transform.position, point, Color.black);
             var job = new ApplyDeformingForceJob
             {
-                Velocites = m_VertexVelocities,
+                Velocities = m_VertexVelocities,
                 Vertices = m_DisplacedVertices,
                 DeltaTime = Time.deltaTime,
                 Force = force,
