@@ -3,9 +3,20 @@ using UnityEngine.UI;
 
 namespace PlayfulSoftware.HexMaps.Hybrid
 {
+#if UNITY_EDITOR
+    using UnityEditor;
+
+    [CustomEditor(typeof(HexGrid))]
+    internal sealed class HexGridEditor : Editor
+    {
+
+    }
+#endif // UNITY_EDITOR
     public sealed class HexGrid : MonoBehaviour
     {
+        [HideInInspector,SerializeField]
         private int m_CellCountX;
+        [HideInInspector,SerializeField]
         private int m_CellCountZ;
         [SerializeField]
         private int m_ChunkCountX;
@@ -24,7 +35,9 @@ namespace PlayfulSoftware.HexMaps.Hybrid
 
         public int seed;
 
+        [HideInInspector,SerializeField]
         private HexCell[] m_Cells;
+        [HideInInspector,SerializeField]
         private HexGridChunk[] m_Chunks;
 
         private int cellCountX => m_CellCountX;
@@ -159,14 +172,27 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             }
         }
 
+#if UNITY_EDITOR
+        void OnValidate()
+        {
+
+        }
+
         void Reset()
         {
             m_ChunkCountX = 6;
             m_ChunkCountZ = 6;
-            m_CellPrefab = null;
-            m_CellLabelPrefab = null;
-            m_ChunkPrefab = null;
+            if (!m_CellLabelPrefab)
+                m_CellLabelPrefab =
+                    AssetDatabase.LoadAssetAtPath<Text>(PackagePrefab("CellLabel.Prefab"));
+            if (!m_CellPrefab)
+                m_CellPrefab =
+                    AssetDatabase.LoadAssetAtPath<HexCell>(PackagePrefab("HexCellPrefab.prefab"));
+            if (!m_ChunkPrefab)
+                m_ChunkPrefab =
+                    AssetDatabase.LoadAssetAtPath<HexGridChunk>(PackagePrefab("GridChunkPrefab.prefab"));
         }
+#endif // UNITY_EDITOR
 
         public HexCell GetCell(Vector3 position)
         {
@@ -193,5 +219,8 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             foreach (var chunk in m_Chunks)
                 chunk.ShowUI(visible);
         }
+
+        string PackagePrefab(string prefab) =>
+            $"Packages/com.playfulsoftware.hexmaps/Prefabs/{prefab}";
     }
 }

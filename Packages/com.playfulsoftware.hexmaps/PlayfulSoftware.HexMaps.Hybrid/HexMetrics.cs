@@ -93,13 +93,8 @@ namespace PlayfulSoftware.HexMaps.Hybrid
 
         public static void InitializeHashGrid(int seed)
         {
-            // save off current random state
-            var oldState = Random.state;
-
-            Random.InitState(seed);
-            hashGrid = new HashGrid<HashEntry>((_) => HashEntry.Create(), seed);
-            // re-apply previous random state
-            Random.state = oldState;
+            using (new RandomSeedScope(seed))
+                hashGrid = new HashGrid<HashEntry>((_) => HashEntry.Create(), seed);
         }
 
         public static Vector3 Perturb(Vector3 position)
