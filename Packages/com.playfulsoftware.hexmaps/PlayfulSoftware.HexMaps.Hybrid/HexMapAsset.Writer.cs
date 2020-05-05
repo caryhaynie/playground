@@ -2,7 +2,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
 {
     public partial class HexMapAsset
     {
-        public class Writer
+        public sealed class Writer
         {
 
         }

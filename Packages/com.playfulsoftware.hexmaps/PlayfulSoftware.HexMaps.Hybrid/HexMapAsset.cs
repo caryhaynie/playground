@@ -6,6 +6,12 @@ namespace PlayfulSoftware.HexMaps.Hybrid
     using UnityEditor;
     using UnityEditor.Experimental.AssetImporters;
 
+    [CustomEditor(typeof(HexMapAsset))]
+    sealed class HexMapAssetEditor : Editor
+    {
+
+    }
+
     [ScriptedImporter(1, "map")]
     sealed class HexMapImporter : ScriptedImporter
     {
