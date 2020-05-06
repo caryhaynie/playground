@@ -31,7 +31,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         [SerializeField]
         private HexGridChunk m_ChunkPrefab;
         [SerializeField]
-        private Texture2D m_NoiseSource;
+        private HexMapGenerationParameters m_ParametersAsset;
 
         public int seed;
 
@@ -60,16 +60,10 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         public HexCell cellPrefab => m_CellPrefab;
         public Text cellLabelPrefab => m_CellLabelPrefab;
         public HexGridChunk chunkPrefab => m_ChunkPrefab;
-        public Texture2D noiseSource
-        {
-            get => m_NoiseSource;
-            set => m_NoiseSource = value;
-        }
 
         void Awake()
         {
-            HexMetrics.noiseSource = m_NoiseSource;
-            HexMetrics.InitializeHashGrid(seed);
+            HexMetrics.parametersAsset = m_ParametersAsset;
 
             m_CellCountX = m_ChunkCountX * HexMetrics.chunkSizeX;
             m_CellCountZ = m_ChunkCountZ * HexMetrics.chunkSizeZ;
@@ -165,11 +159,8 @@ namespace PlayfulSoftware.HexMaps.Hybrid
 
         void OnEnable()
         {
-            if (!HexMetrics.noiseSource)
-            {
-                HexMetrics.noiseSource = m_NoiseSource;
-                HexMetrics.InitializeHashGrid(seed);
-            }
+            if (!HexMetrics.parametersAsset)
+                HexMetrics.parametersAsset = m_ParametersAsset;
         }
 
 #if UNITY_EDITOR

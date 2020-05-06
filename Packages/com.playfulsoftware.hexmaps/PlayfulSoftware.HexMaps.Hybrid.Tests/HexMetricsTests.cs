@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
+using PlayfulSoftware.HexMaps.Hybrid;
 using UnityEngine;
 using UnityEngine.TestTools;
 
@@ -24,5 +25,18 @@ namespace Tests
             // Use yield to skip a frame.
             yield return null;
         }
-    }
+
+        [Test]
+        public void HexMetricsThowsExceptionsWhenNotInitialized()
+        {
+            Assert.That(HexMetrics.initialized, Is.False);
+            Assert.That(() => HexMetrics.outerRadius, Throws.Exception);
+        }
+
+        [Test]
+        public void HexMetricsDoesNotThrowWhenInitialized()
+        {
+            //Assert.That(HexMetrics.initialized);
+        }
+}
 }

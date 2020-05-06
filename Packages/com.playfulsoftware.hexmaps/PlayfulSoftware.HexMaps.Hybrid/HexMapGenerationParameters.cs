@@ -3,20 +3,52 @@
 namespace PlayfulSoftware.HexMaps.Hybrid
 {
 #if UNITY_EDITOR
+    using System;
     using UnityEditor;
+
+    internal class CustomEditorLabelWidthScope : IDisposable
+    {
+        internal CustomEditorLabelWidthScope(float increment)
+        {
+            EditorGUIUtility.labelWidth += increment;
+        }
+
+        void IDisposable.Dispose()
+        {
+            EditorGUIUtility.labelWidth = 0f;
+        }
+    }
 
     [CustomEditor(typeof(HexMapGenerationParameters))]
     internal sealed class HexMapGenerationParametersEditor : Editor
     {
+        private SerializedProperty m_CellPerturbStrengthProp;
         private SerializedProperty m_CornersProp;
         private SerializedProperty m_ChunkSizeXProp;
         private SerializedProperty m_ChunkSizeZProp;
+        private SerializedProperty m_ElevationPerturbStrength;
+        private SerializedProperty m_ElevationStepProp;
+        private SerializedProperty m_NoiseScaleProp;
+        private SerializedProperty m_NoiseSourceProp;
+        private SerializedProperty m_OuterRadiusProp;
+        private SerializedProperty m_SeedProp;
+        private SerializedProperty m_SolidFactorProp;
+        private SerializedProperty m_StreamBedElevationOffsetProp;
 
         void OnEnable()
         {
+            m_CellPerturbStrengthProp = serializedObject.FindProperty("cellPerturbStrength");
             m_CornersProp = serializedObject.FindProperty("m_Corners");
             m_ChunkSizeXProp = serializedObject.FindProperty("chunkSizeX");
             m_ChunkSizeZProp = serializedObject.FindProperty("chunkSizeZ");
+            m_ElevationPerturbStrength = serializedObject.FindProperty("elevationPerturbStrength");
+            m_ElevationStepProp = serializedObject.FindProperty("elevationStep");
+            m_NoiseScaleProp = serializedObject.FindProperty("noiseScale");
+            m_NoiseSourceProp = serializedObject.FindProperty("noiseSource");
+            m_OuterRadiusProp = serializedObject.FindProperty("outerRadius");
+            m_SeedProp = serializedObject.FindProperty("seed");
+            m_SolidFactorProp = serializedObject.FindProperty("solidFactor");
+            m_StreamBedElevationOffsetProp = serializedObject.FindProperty("streamBedElevationOffset");
         }
 
         public override void OnInspectorGUI()
@@ -30,18 +62,39 @@ namespace PlayfulSoftware.HexMaps.Hybrid
 
         void DrawConfigurationOptions()
         {
-            EditorGUILayout.LabelField("Map Size:");
+            EditorGUILayout.LabelField("Map Size");
             using (new EditorGUI.IndentLevelScope())
             {
                 EditorGUILayout.PropertyField(m_ChunkSizeXProp);
                 EditorGUILayout.PropertyField(m_ChunkSizeZProp);
+                EditorGUILayout.PropertyField(m_OuterRadiusProp);
+            }
+
+            EditorGUILayout.LabelField("Advanced Options");
+            using (new EditorGUI.IndentLevelScope())
+            {
+                EditorGUILayout.PropertyField(m_ElevationStepProp);
+                EditorGUILayout.PropertyField(m_SolidFactorProp);
+            }
+
+            EditorGUILayout.LabelField("Noise Options");
+            using (new EditorGUI.IndentLevelScope())
+            using (new CustomEditorLabelWidthScope(20f))
+            {
+                EditorGUILayout.PropertyField(m_NoiseSourceProp);
+                EditorGUILayout.PropertyField(m_SeedProp);
+                EditorGUILayout.PropertyField(m_NoiseScaleProp);
+                EditorGUILayout.PropertyField(m_CellPerturbStrengthProp);
+                EditorGUILayout.PropertyField(m_ElevationPerturbStrength);
             }
         }
 
         void DrawDerivedValues()
         {
+            var obj = (HexMapGenerationParameters) target;
             using (new EditorGUI.DisabledScope(true))
             {
+                EditorGUILayout.FloatField("Inner Radius", obj.innerRadius);
                 var realExpanded = m_CornersProp.isExpanded;
                 m_CornersProp.isExpanded = true;
                 EditorGUILayout.PropertyField(m_CornersProp);
@@ -57,6 +110,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         public const float outerToInner = 0.866025404f;
         public const float innerToOuter = 1f / outerToInner;
 
+        [Tooltip("Constant scale factor applied to random values sampled from noise texture")]
         public float cellPerturbStrength = 4f;
 
         [Tooltip("Number of chunks to generate, horizontally")]
@@ -67,6 +121,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         public float elevationStep = 3f;
         public float noiseScale = 0.003f;
         public float outerRadius = 10f;
+        [Tooltip("Seed value to use when initializing the Pseudorandom Number Generator")]
         public int seed = 1234;
         public float solidFactor = 0.8f;
         public float streamBedElevationOffset = -1.75f;

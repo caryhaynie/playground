@@ -98,7 +98,7 @@ LightmapSettings:
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 0}
-  m_UseShadowmask: 1
+  m_UseShadowmask: 0
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
@@ -6067,6 +6067,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fed56e41f464c4a13a74fb657351028c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_CellCountX: 0
+  m_CellCountZ: 0
   m_ChunkCountX: 4
   m_ChunkCountZ: 3
   m_DefaultColor: {r: 1, g: 1, b: 1, a: 1}
@@ -6076,8 +6078,10 @@ MonoBehaviour:
     type: 3}
   m_ChunkPrefab: {fileID: 2059187222127590094, guid: 5ef6b29ec0ae24c4caf35185f528f2c1,
     type: 3}
-  m_NoiseSource: {fileID: 2800000, guid: b0b9be54d250246a6a0e3c34aab4bbe7, type: 3}
+  m_ParametersAsset: {fileID: 11400000, guid: b21d55a3f2a514e2b813108cbdbcd99c, type: 2}
   seed: 1234
+  m_Cells: []
+  m_Chunks: []
 --- !u!4 &1340907827
 Transform:
   m_ObjectHideFlags: 0
@@ -8414,10 +8418,10 @@ MonoBehaviour:
   moveSpeedMinZoom: 400
   moveSpeedMaxZoom: 100
   rotationSpeed: 180
-  stickMinZoom: -250
-  stickMaxZoom: -45
-  swivelMinZoom: 90
-  swivelMaxZoom: 45
+  stickMinZoomDistance: -250
+  stickMaxZoomDistance: -45
+  swivelMinZoomAngle: 90
+  swivelMaxZoomAngle: 45
 --- !u!4 &1787070950
 Transform:
   m_ObjectHideFlags: 0
