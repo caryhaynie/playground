@@ -58,6 +58,8 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             DrawConfigurationOptions();
             EditorGUILayout.LabelField("Derived Values:", EditorStyles.boldLabel);
             DrawDerivedValues();
+
+            serializedObject.ApplyModifiedProperties();
         }
 
         void DrawConfigurationOptions()
