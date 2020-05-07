@@ -4,9 +4,11 @@ using UnityEngine;
 
 namespace Tests
 {
-    public sealed class HexMapGenerationParametersTestLoader : MonoBehaviour
+    sealed class HexMapGenerationParametersTestLoader : MonoBehaviour
     {
+#pragma warning disable 0649
         public HexMapGenerationParameters parametersAsset;
+#pragma warning restore 0649
 
         void OnDisable()
         {

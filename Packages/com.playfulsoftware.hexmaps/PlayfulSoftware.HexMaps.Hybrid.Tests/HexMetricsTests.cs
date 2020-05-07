@@ -4,17 +4,17 @@ using PlayfulSoftware.HexMaps.Hybrid;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
-
+using UnityEngine.TestTools.Utils;
 #if UNITY_EDITOR
-using UnityEditor;
 using UnityEditor.SceneManagement;
-
 #endif // UNITY_EDITOR
 
 namespace Tests
 {
     public class HexMetricsTests
     {
+        private const string kTestSceneName = "TestData/Scenes/HexMetricsTestScene";
+
         // A Test behaves as an ordinary method
         [Test]
         public void HexMetricsTestsSimplePasses()
@@ -43,20 +43,30 @@ namespace Tests
         public IEnumerator HexMetricsDoesNotThrowWhenInitialized()
         {
             Assert.That(HexMetrics.initialized, Is.False);
-            yield return LoadSceneAsync("TestData/Scenes/HexMetricsTestScene");
-            //yield return SceneManager.LoadSceneAsync("TestData/Scenes/HexMetricsTestScene", LoadSceneMode.Additive);
+            yield return LoadSceneAsync(kTestSceneName);
             yield return null;
-            // var go = GameObject.Find("ParameterAssetLoader");
-            // if (!go)
-            //     Assert.Fail("Failed to find the loader gameobject!");
-            // var loader = go.GetComponent<HexMapGenerationParametersTestLoader>();
-            // if (!loader)
-            //     Assert.Fail("Failed to find the loader component!");
-            // HexMetrics.parametersAsset = loader.parametersAsset;
             Assert.That(HexMetrics.initialized, Is.True);
             HexMetrics.parametersAsset = null;
-            yield return SceneManager.UnloadSceneAsync("TestData/Scenes/HexMetricsTestScene");
+            yield return SceneManager.UnloadSceneAsync(kTestSceneName);
             Assert.That(HexMetrics.initialized, Is.False);
+        }
+
+        [UnityTest]
+        public IEnumerator HexMetricsRadiusValuesAreConsistent()
+        {
+            yield return LoadSceneAsync(kTestSceneName);
+            yield return null;
+
+            var outerRadius = HexMetrics.outerRadius;
+            var innerRadius = HexMetrics.innerRadius;
+            var innerToOuter = HexMetrics.innerToOuter;
+            var outerToInner = HexMetrics.outerToInner;
+
+            Assert.That(outerRadius * outerToInner, Is.EqualTo(innerRadius).Using(FloatEqualityComparer.Instance));
+            Assert.That(innerRadius * innerToOuter, Is.EqualTo(outerRadius).Using(FloatEqualityComparer.Instance));
+
+            HexMetrics.parametersAsset = null;
+            yield return SceneManager.UnloadSceneAsync(kTestSceneName);
         }
 
         private AsyncOperation LoadSceneAsync(string name)
