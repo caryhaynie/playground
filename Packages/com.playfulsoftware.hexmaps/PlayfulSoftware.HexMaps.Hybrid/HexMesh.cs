@@ -4,8 +4,9 @@ using UnityEngine;
 
 namespace PlayfulSoftware.HexMaps.Hybrid
 {
-    [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
     [DisallowMultipleComponent]
+    [ExecuteAlways]
+    [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
     public sealed class HexMesh : MonoBehaviour
     {
         public bool useCollider;
@@ -13,7 +14,9 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         public bool useUVCoordinates;
         public bool useUV2Coordinates;
 
+        [SerializeField]
         Mesh m_HexMesh;
+        [SerializeField]
         MeshCollider m_MeshCollider;
 
         [NonSerialized] private List<Vector3> m_Vertices;
@@ -24,6 +27,8 @@ namespace PlayfulSoftware.HexMaps.Hybrid
 
         void Awake()
         {
+            if (m_HexMesh && m_MeshCollider)
+                return;
             GetComponent<MeshFilter>().mesh = m_HexMesh = new Mesh();
             m_HexMesh.name = "Hex Mesh";
             if (useCollider)

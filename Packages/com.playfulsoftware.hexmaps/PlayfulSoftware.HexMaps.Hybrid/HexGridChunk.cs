@@ -2,9 +2,12 @@ using UnityEngine;
 
 namespace PlayfulSoftware.HexMaps.Hybrid
 {
+    [ExecuteAlways]
     public sealed class HexGridChunk : MonoBehaviour
     {
+        [SerializeField]
         private HexCell[] m_Cells;
+        [SerializeField]
         private Canvas m_GridCanvas;
 
         public HexMesh estuaries;
@@ -18,9 +21,10 @@ namespace PlayfulSoftware.HexMaps.Hybrid
 
         void Awake()
         {
-            m_GridCanvas = GetComponentInChildren<Canvas>();
-
-            m_Cells = new HexCell[HexMetrics.chunkSizeX * HexMetrics.chunkSizeZ];
+            if (!m_GridCanvas)
+                m_GridCanvas = GetComponentInChildren<Canvas>();
+            if (m_Cells.IsNullOrEmpty())
+                m_Cells = new HexCell[HexMetrics.chunkSizeX * HexMetrics.chunkSizeZ];
             ShowUI(false);
         }
 

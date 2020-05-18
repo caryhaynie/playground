@@ -69,8 +69,8 @@ namespace PlayfulSoftware.Splines.Hybrid
             if (EditorGUI.EndChangeCheck())
             {
                 Undo.RecordObject(m_Spline, "Toggle Loop");
-                EditorUtility.SetDirty(m_Spline);
                 m_Spline.loop = loop;
+                EditorUtility.SetDirty(m_Spline);
             }
             if (m_SelectedIndex >= 0 && m_SelectedIndex < m_Spline.controlPointCount)
             {

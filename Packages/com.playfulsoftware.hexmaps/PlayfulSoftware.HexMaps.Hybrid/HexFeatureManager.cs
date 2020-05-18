@@ -53,7 +53,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         public void Clear()
         {
             if (m_Container)
-                Destroy(m_Container.gameObject);
+                GameObjectUtility.SafelyDeleteGameObject(m_Container.gameObject);
             m_Container = new GameObject("FeaturesContainer").transform;
             m_Container.SetParent(transform, false);
         }

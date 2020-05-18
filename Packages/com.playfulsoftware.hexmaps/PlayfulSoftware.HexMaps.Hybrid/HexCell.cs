@@ -17,7 +17,17 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             GUI.Label(position, enabled ? $"{dir}" : "None");
         }
     }
+
+    [CustomEditor(typeof(HexCell))]
+    sealed class HexCellEditor : Editor
+    {
+        void OnSceneGUI()
+        {
+
+        }
+    }
 #endif // UNITY_EDITOR
+    [ExecuteAlways]
     public sealed class HexCell : MonoBehaviour
     {
         [Serializable]
@@ -37,13 +47,11 @@ namespace PlayfulSoftware.HexMaps.Hybrid
 
         [SerializeField] Color m_Color;
         [SerializeField] int m_Elevation = Int32.MinValue;
-
-        [Header("Water")]
-        [SerializeField] RiverState m_IncomingRiver;
-        [SerializeField] RiverState m_OutgoingRiver;
         [SerializeField] int m_WaterLevel;
 
-        [Header("Features")]
+        [SerializeField] RiverState m_IncomingRiver;
+        [SerializeField] RiverState m_OutgoingRiver;
+
         [SerializeField] int m_FarmLevel;
         [SerializeField] int m_PlantLevel;
         [SerializeField] int m_UrbanLevel;

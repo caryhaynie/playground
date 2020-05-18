@@ -6,7 +6,7 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 0
-    path: Assets/Scenes/HexMap Editor.unity
+    path: Assets/Scenes/HexMap Runtime Editor.unity
     guid: 440f263f017a2454abc5b680bb979090
   - enabled: 0
     path: Assets/TestData/Scenes/HexMetricsTestScene.unity
