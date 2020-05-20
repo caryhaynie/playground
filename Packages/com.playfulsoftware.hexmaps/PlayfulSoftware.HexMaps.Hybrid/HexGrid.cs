@@ -54,6 +54,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             {
                 if (GUILayout.Button("Delete Existing Chunks"))
                 {
+                    Undo.RecordObject(grid, "Delete Existing Chunks");
                     grid.RemoveExistingChunks();
                 }
             }
@@ -134,7 +135,6 @@ namespace PlayfulSoftware.HexMaps.Hybrid
 
         void AwakeEditmode()
         {
-            DebugHelper.LogNoStacktrace("AwakeEditmode");
         }
 
         void AwakePlaymode()
@@ -178,7 +178,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             HexCell cell = m_Cells[i] = Instantiate<HexCell>(m_CellPrefab);
             cell.transform.localPosition = position;
             cell.coordinates = HexCoordinates.FromOffsetCoordinates(x, z);
-            cell.name = $"Cell @ {cell.coordinates}";
+            cell.name = $"Cell #{i} {cell.coordinates}";
             cell.color = defaultColor;
 
 

@@ -1,3 +1,4 @@
+using UnityEditor;
 using UnityEngine;
 
 namespace PlayfulSoftware.HexMaps.Hybrid
@@ -49,6 +50,10 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         void LateUpdate()
         {
             Triangulate();
+#if UNITY_EDITOR
+            if (!Application.IsPlaying(gameObject))
+                Undo.RecordObject(gameObject, "Chunk Updated");
+#endif // UNITY_EDITOR
             enabled = false;
         }
 

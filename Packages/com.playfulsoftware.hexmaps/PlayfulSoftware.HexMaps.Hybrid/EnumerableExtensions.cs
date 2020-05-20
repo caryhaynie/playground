@@ -3,13 +3,7 @@ using System.Collections.Generic;
 
 namespace PlayfulSoftware.HexMaps.Hybrid
 {
-    internal static class ArrayExtensions
-    {
-        public static bool IsNullOrEmpty<T>(this T[] self)
-            => self == null || self.Length == 0;
-    }
-
-    internal static class EnumerableExtensions
+    static class EnumerableExtensions
     {
         public static IEnumerable<TResult> Pairwise<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, TSource, TResult> selector)
         {
