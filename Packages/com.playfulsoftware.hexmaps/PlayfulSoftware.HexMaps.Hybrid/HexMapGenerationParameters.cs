@@ -128,6 +128,8 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         public float solidFactor = 0.8f;
         public float streamBedElevationOffset = -1.75f;
         public int terracesPerSlope = 2;
+        public float wallHeight = 3f;
+        public float wallThickness = 0.75f;
         public float waterFactor = 0.6f;
         public float waterSurfaceElevationOffset = -0.25f;
 
@@ -142,6 +144,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         public float innerRadius => outerRadius * outerToInner; // sqrt(3) / 2
         public int terracedSteps => terracesPerSlope * 2 + 1;
         public float verticalTerraceStepSize => 1f / (terracesPerSlope + 1);
+        public float wallElevationOffset => verticalTerraceStepSize;
         public float waterBlendFactor => 1f - waterFactor;
 
         private static float[][] featureThresholds =
@@ -260,7 +263,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             var h = step * horizontalTerraceStepSize;
             a.x += (b.x - a.x) * h;
             a.z += (b.z - a.z) * h;
-            var v = ((step + 1) / 2) * verticalTerraceStepSize;
+            var v = (step + 1) / 2 * verticalTerraceStepSize;
             a.y += (b.y - a.y) * v;
             return a;
         }
@@ -270,5 +273,20 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             var h = step * horizontalTerraceStepSize;
             return Color.Lerp(a, b, h);
         }
+
+        public Vector3 WallLerp(Vector3 near, Vector3 far)
+        {
+            near.x = (far.x - near.x) * 0.5f;
+            near.z = (far.z - near.z) * 0.5f;
+            var v = (near.y < far.y)
+                ? wallElevationOffset
+                : (1f - wallElevationOffset);
+            near.y += (far.y - near.y) * v;
+            return near;
+        }
+
+        public Vector3 WallThicknessOffset(Vector3 near, Vector3 far)
+            => new Vector3(far.x - near.x, 0f, far.z - near.z)
+                .normalized * (wallThickness * 0.5f);
     }
 }

@@ -1,8 +1,17 @@
-using UnityEditor;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace PlayfulSoftware.HexMaps.Hybrid
 {
+#if UNITY_EDITOR
+    using UnityEditor;
+    using UnityEditor.SceneManagement;
+
+    [CustomEditor(typeof(HexGridChunk))]
+    sealed class HexGridChunkEditor : Editor
+    {
+    }
+#endif // UNITY_EDITOR
     [ExecuteAlways]
     public sealed class HexGridChunk : MonoBehaviour
     {
@@ -11,10 +20,13 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         [SerializeField]
         private Canvas m_GridCanvas;
 
+        public ChunkMeshData meshData;
+
         public HexMesh estuaries;
-        public HexMesh terrain;
         public HexMesh rivers;
         public HexMesh roads;
+        public HexMesh terrain;
+        public HexMesh walls;
         public HexMesh water;
         public HexMesh waterShore;
 
@@ -49,11 +61,14 @@ namespace PlayfulSoftware.HexMaps.Hybrid
 
         void LateUpdate()
         {
-            Triangulate();
 #if UNITY_EDITOR
+            if (!ShouldPerformChunkUpdate())
+                return;
             if (!Application.IsPlaying(gameObject))
                 Undo.RecordObject(gameObject, "Chunk Updated");
 #endif // UNITY_EDITOR
+            if (HasValidCellArray())
+                Triangulate();
             enabled = false;
         }
 
@@ -79,6 +94,23 @@ namespace PlayfulSoftware.HexMaps.Hybrid
                 return interp;
             }
         }
+
+        bool HasValidCellArray()
+        {
+            if (m_Cells == null)
+                return false;
+            if (m_Cells.Length == 0)
+                return false;
+            foreach (var cell in m_Cells)
+                if (!cell)
+                    return false;
+            return true;
+        }
+
+#if UNITY_EDITOR
+        bool ShouldPerformChunkUpdate()
+            => Application.IsPlaying(gameObject) || StageUtility.GetCurrentStageHandle() == StageUtility.GetMainStageHandle();
+#endif // UNITY_EDITOR
 
         void Triangulate()
         {
@@ -240,7 +272,10 @@ namespace PlayfulSoftware.HexMaps.Hybrid
                 el.v1 + bridge,
                 el.v5 + bridge);
 
-            if (cell.HasRiverThroughEdge(direction))
+            var hasRiver = cell.HasRiverThroughEdge(direction);
+            var hasRoad = cell.HasRoadThroughEdge(direction);
+
+            if (hasRiver)
             {
                 el2.v3.y = neighbor.streamBedY;
 
@@ -267,15 +302,18 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             }
 
             if (cell.GetEdgeType(direction) == HexEdgeType.Slope)
-                TriangulateEdgeTerraces(el, cell, el2, neighbor, cell.HasRoadThroughEdge(direction));
+                TriangulateEdgeTerraces(el, cell, el2, neighbor, hasRoad);
             else
             {
-                TriangulateEdgeStrip(el, cell.color, el2, neighbor.color, cell.HasRoadThroughEdge(direction));
+                TriangulateEdgeStrip(el, cell.color, el2, neighbor.color, hasRoad);
             }
+
+            features.AddWall(el, cell, el2, neighbor, hasRiver, hasRoad);
 
             var next_d = direction.Next();
             var nextNeighbor = cell.GetNeighbor(next_d);
-            if (direction <= HexDirection.E && nextNeighbor != null)
+
+            if (direction <= HexDirection.E && nextNeighbor)
             {
                 var v5 = el.v5 + HexMetrics.GetBridge(next_d);
                 v5.y = nextNeighbor.position.y;
@@ -335,6 +373,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
                 terrain.AddTriangle(bottom, left, right);
                 terrain.AddTriangleColor(bottomCell.color, leftCell.color, rightCell.color);
             }
+            features.AddWall(bottom, bottomCell, left, leftCell, right, rightCell);
         }
 
         void TriangulateCornerTerracesCliff(

@@ -153,6 +153,33 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             }
         }
 
+        public static float wallElevationOffset
+        {
+            get
+            {
+                VerifyParameterAssetAndThrow();
+                return parametersAsset.wallElevationOffset;
+            }
+        }
+
+        public static float wallHeight
+        {
+            get
+            {
+                VerifyParameterAssetAndThrow();
+                return parametersAsset.wallHeight;
+            }
+        }
+
+        public static float wallThickness
+        {
+            get
+            {
+                VerifyParameterAssetAndThrow();
+                return parametersAsset.wallThickness;
+            }
+        }
+
         public static float waterBlendFactor
         {
             get
@@ -278,6 +305,18 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         {
             VerifyParameterAssetAndThrow();
             return parametersAsset.TerraceLerp(a, b, step);
+        }
+
+        public static Vector3 WallLerp(Vector3 near, Vector3 far)
+        {
+            VerifyParameterAssetAndThrow();
+            return parametersAsset.WallLerp(near, far);
+        }
+
+        public static Vector3 WallThicknessOffset(Vector3 near, Vector3 far)
+        {
+            VerifyParameterAssetAndThrow();
+            return parametersAsset.WallThicknessOffset(near, far);
         }
     }
 }

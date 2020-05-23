@@ -31,7 +31,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 7710368609524793127}
-  m_RootOrder: 6
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &5497948979224961761
 MeshFilter:
@@ -92,10 +92,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e7a2ae68958394b309b61c2acffa92fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  useCollider: 0
-  useColors: 0
-  useUVCoordinates: 1
-  useUV2Coordinates: 0
+  m_Options: 4
+  m_HexMesh: {fileID: 0}
+  m_MeshCollider: {fileID: 0}
+  LogMeshStatsOnAwake: 0
 --- !u!1 &2550446246532151310
 GameObject:
   m_ObjectHideFlags: 0
@@ -188,10 +188,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e7a2ae68958394b309b61c2acffa92fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  useCollider: 0
-  useColors: 0
-  useUVCoordinates: 1
-  useUV2Coordinates: 0
+  m_Options: 0
+  m_HexMesh: {fileID: 0}
+  m_MeshCollider: {fileID: 0}
+  LogMeshStatsOnAwake: 0
 --- !u!1 &4020387975763952679
 GameObject:
   m_ObjectHideFlags: 0
@@ -284,10 +284,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e7a2ae68958394b309b61c2acffa92fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  useCollider: 0
-  useColors: 0
-  useUVCoordinates: 1
-  useUV2Coordinates: 1
+  m_Options: 12
+  m_HexMesh: {fileID: 0}
+  m_MeshCollider: {fileID: 0}
+  LogMeshStatsOnAwake: 0
 --- !u!1 &4198868594370254293
 GameObject:
   m_ObjectHideFlags: 0
@@ -305,7 +305,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &8140209561341835245
 RectTransform:
   m_ObjectHideFlags: 0
@@ -380,6 +380,7 @@ GameObject:
   - component: {fileID: 410918469347452636}
   - component: {fileID: 8035974890775839183}
   - component: {fileID: 3318886604286190099}
+  - component: {fileID: 9160268868329415780}
   m_Layer: 0
   m_Name: TerrainMesh
   m_TagString: Untagged
@@ -460,10 +461,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e7a2ae68958394b309b61c2acffa92fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  useCollider: 1
-  useColors: 1
-  useUVCoordinates: 0
-  useUV2Coordinates: 0
+  m_Options: 3
+  m_HexMesh: {fileID: 0}
+  m_MeshCollider: {fileID: 9160268868329415780}
+  LogMeshStatsOnAwake: 0
+--- !u!64 &9160268868329415780
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5194329132302941966}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 0}
 --- !u!1 &7758838335086393013
 GameObject:
   m_ObjectHideFlags: 0
@@ -493,7 +508,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 7710368609524793127}
-  m_RootOrder: 7
+  m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &3856949396926626316
 MonoBehaviour:
@@ -537,6 +552,7 @@ MonoBehaviour:
   - prefabs:
     - {fileID: 7034933398158008682, guid: d426feb4692dc40e286f543e0de53ec4, type: 3}
     - {fileID: 7034933398158008682, guid: 292704447c9c74072b03349b00dc39d5, type: 3}
+  walls: {fileID: 7910889868445456923}
 --- !u!1 &7805341613409183484
 GameObject:
   m_ObjectHideFlags: 0
@@ -629,10 +645,106 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e7a2ae68958394b309b61c2acffa92fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  useCollider: 0
-  useColors: 0
-  useUVCoordinates: 1
-  useUV2Coordinates: 0
+  m_Options: 0
+  m_HexMesh: {fileID: 0}
+  m_MeshCollider: {fileID: 0}
+  LogMeshStatsOnAwake: 0
+--- !u!1 &8060721536796490177
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6778660015152070306}
+  - component: {fileID: 8425538340941606742}
+  - component: {fileID: 5080471545299582703}
+  - component: {fileID: 7910889868445456923}
+  m_Layer: 0
+  m_Name: WallMesh
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6778660015152070306
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8060721536796490177}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 7710368609524793127}
+  m_RootOrder: 5
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!33 &8425538340941606742
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8060721536796490177}
+  m_Mesh: {fileID: 0}
+--- !u!23 &5080471545299582703
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8060721536796490177}
+  m_Enabled: 1
+  m_CastShadows: 2
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 027d0bc27c7844bf3ac97e25353dfea6, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 0
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+--- !u!114 &7910889868445456923
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8060721536796490177}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e7a2ae68958394b309b61c2acffa92fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Options: 0
+  m_HexMesh: {fileID: 0}
+  m_MeshCollider: {fileID: 0}
+  LogMeshStatsOnAwake: 0
 --- !u!1 &8675540174201813429
 GameObject:
   m_ObjectHideFlags: 0
@@ -664,7 +776,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 7710368609524793127}
-  m_RootOrder: 5
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &8193189693109989711
 MeshFilter:
@@ -725,10 +837,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e7a2ae68958394b309b61c2acffa92fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  useCollider: 0
-  useColors: 0
-  useUVCoordinates: 0
-  useUV2Coordinates: 0
+  m_Options: 0
+  m_HexMesh: {fileID: 0}
+  m_MeshCollider: {fileID: 0}
+  LogMeshStatsOnAwake: 0
 --- !u!1 &9018845389241362867
 GameObject:
   m_ObjectHideFlags: 0
@@ -762,6 +874,7 @@ Transform:
   - {fileID: 1678067604225728968}
   - {fileID: 8070664886696809782}
   - {fileID: 2621216712201752548}
+  - {fileID: 6778660015152070306}
   - {fileID: 4440127712218768623}
   - {fileID: 7296839416818408875}
   - {fileID: 4018521199506720765}
@@ -780,10 +893,39 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ad62ff6b98e294578b89fe1804d5ea6c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_Cells:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  m_GridCanvas: {fileID: 3771038426563679514}
+  meshData: {fileID: 0}
   estuaries: {fileID: 5652424110310760650}
-  terrain: {fileID: 3318886604286190099}
   rivers: {fileID: 1844887016729533253}
   roads: {fileID: 6408078222187878564}
+  terrain: {fileID: 3318886604286190099}
+  walls: {fileID: 7910889868445456923}
   water: {fileID: 4038534142631568160}
   waterShore: {fileID: 8779263740564548586}
   features: {fileID: 3856949396926626316}

@@ -38,6 +38,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         #if UNITY_EDITOR
         void OnValidate()
         {
+
         }
         #endif // UNITY_EDITOR
 
@@ -46,15 +47,19 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             if (LogMeshStatsOnAwake)
                 LogMeshStats();
             if (!m_HexMesh)
-            {
-                if (Application.IsPlaying(gameObject))
-                    GetComponent<MeshFilter>().mesh = m_HexMesh = new Mesh();
-                else
-                    GetComponent<MeshFilter>().sharedMesh = m_HexMesh = new Mesh();
-                m_HexMesh.name = "Hex Mesh";
-            }
+                SetMeshInternal(new Mesh(), "Hex Mesh");
             if (useCollider && !m_MeshCollider)
                 m_MeshCollider = gameObject.AddComponent<MeshCollider>();
+        }
+
+        internal void SetMeshInternal(Mesh mesh, string meshName = null)
+        {
+            if (Application.IsPlaying(gameObject))
+                GetComponent<MeshFilter>().mesh = m_HexMesh = new Mesh();
+            else
+                GetComponent<MeshFilter>().sharedMesh = m_HexMesh = new Mesh();
+            if (!string.IsNullOrEmpty(meshName))
+                m_HexMesh.name = meshName;
         }
 
         public void Apply()
