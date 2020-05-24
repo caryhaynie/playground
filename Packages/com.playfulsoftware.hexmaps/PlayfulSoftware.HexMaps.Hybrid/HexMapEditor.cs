@@ -1,4 +1,3 @@
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -23,11 +22,13 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         EditMode m_Elevation;
         EditMode m_FarmLevel;
         EditMode m_PlantLevel;
+        EditMode m_SpecialLevel;
         EditMode m_UrbanLevel;
         EditMode m_WaterLevel;
         int m_BrushSize;
         OptionalToggle m_RiverMode = OptionalToggle.Ignore;
         OptionalToggle m_RoadMode = OptionalToggle.Ignore;
+        OptionalToggle m_WalledMode = OptionalToggle.Ignore;
         #endregion
 
         #region Drag-related Fields
@@ -118,10 +119,14 @@ namespace PlayfulSoftware.HexMaps.Hybrid
                 cell.urbanLevel = m_UrbanLevel.level;
             if (m_WaterLevel.enabled)
                 cell.waterLevel = m_WaterLevel.level;
+            if (m_SpecialLevel.enabled)
+                cell.specialIndex = m_SpecialLevel.level;
             if (m_RiverMode == OptionalToggle.No)
                 cell.RemoveRiver();
             if (m_RoadMode == OptionalToggle.No)
                 cell.RemoveRoads();
+            if (m_WalledMode != OptionalToggle.Ignore)
+                cell.walled = m_WalledMode == OptionalToggle.Yes;
             if (m_IsDrag)
             {
                 var otherCell = cell.GetNeighbor(m_DragDirection.Opposite());
@@ -155,6 +160,11 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         public void SetApplyPlantLevel(bool toggle)
         {
             m_PlantLevel.enabled = toggle;
+        }
+
+        public void SetApplySpecialLevel(bool toggle)
+        {
+            m_SpecialLevel.enabled = toggle;
         }
 
         public void SetApplyUrbanLevel(bool toggle)
@@ -197,9 +207,19 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             m_PlantLevel.level = (int) level;
         }
 
+        public void SetSpecialLevel(float level)
+        {
+            m_SpecialLevel.level = (int) level;
+        }
+
         public void SetUrbanLevel(float level)
         {
             m_UrbanLevel.level = (int) level;
+        }
+
+        public void SetWalledMode(int mode)
+        {
+            m_WalledMode = (OptionalToggle) mode;
         }
 
         public void SetWaterLevel(float level)

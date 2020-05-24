@@ -1,0 +1,12 @@
+{
+  "name": "PlayfulSoftware.HexMaps",
+  "allowUnsafeCode": true,
+  "references": [
+    "Unity.Burst",
+    "Unity.Collections",
+    "Unity.Entities",
+    "Unity.Jobs",
+    "Unity.Mathematics",
+    "Unity.Transforms"
+  ]
+}

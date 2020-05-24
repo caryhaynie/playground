@@ -1,139 +1,349 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Diagnostics;
+using UnityEngine;
 
 namespace PlayfulSoftware.HexMaps.Hybrid
 {
     public static class HexMetrics
     {
-        public const float blendFactor = 1f - solidFactor;
-        public const float cellPerturbStrength = 4f;
-        public const int chunkSizeX = 5, chunkSizeZ = 5;
-        public const float elevationPerturbStrength = 1.5f;
-        public const float elevationStep = 3f;
-        public const float horizontalTerraceStepSize = 1f / terracedSteps;
-        public const float innerRadius = outerRadius * outerToInner; // sqrt(3) / 2
-        public const float noiseScale = 0.003f;
-        public const float outerRadius = 10f;
-        public const float waterSurfaceElevationOffset = -0.25f;
-        public const float solidFactor = 0.8f;
-        public const float streamBedElevationOffset = -1.75f;
-        public const int terracesPerSlope = 2;
-        public const int terracedSteps = terracesPerSlope * 2 + 1;
-        public const uint triangleSubdivisions = 2;
-        public const float verticalTerraceStepSize = 1f / (terracesPerSlope + 1);
-        public const float waterBlendFactor = 1f - waterFactor;
-        public const float waterFactor = 0.6f;
+        public static bool initialized => parametersAsset;
+        public static HexMapGenerationParameters parametersAsset { get; set; }
 
-        public const float outerToInner = 0.866025404f;
-        public const float innerToOuter = 1f / outerToInner;
-
-        static Vector3[] corners = {
-            new Vector3(0f, 0f, outerRadius), // N
-            new Vector3(innerRadius, 0f,  0.5f * outerRadius), // NE
-            new Vector3(innerRadius, 0f, -0.5f * outerRadius), // SE
-            new Vector3(0f, 0f, -outerRadius), // S
-            new Vector3(-innerRadius, 0f, -0.5f * outerRadius), // SW
-            new Vector3(-innerRadius, 0f,  0.5f * outerRadius) // NW
-        };
-
-        private static float[][] featureThresholds =
+        [Conditional("DEBUG")]
+        private static void VerifyParameterAssetAndThrow()
         {
-            new float[] { 0f, 0f, 0.4f},
-            new float[] { 0f, 0.4f, 0.6f},
-            new float[] { 0.4f, 0.6f, 0.8f}
-        };
+#if DEBUG
+            if (!parametersAsset)
+                throw new Exception("A valid Hex Map Generation Parameters asset has not been set!");
+#endif // DEBUG
+        }
 
-        static HashGrid<HashEntry> hashGrid;
-
-        internal static Texture2D noiseSource;
-
-        public static Vector3 GetBridge(HexDirection d)
-            => (GetFirstCorner(d) + GetSecondCorner(d)) * blendFactor;
-
-        public static Vector3 GetWaterBridge(HexDirection d)
-            => (GetFirstCorner(d) + GetSecondCorner(d)) * waterBlendFactor;
-
-        public static HexEdgeType GetEdgeType(int elevation1, int elevation2)
+        public static float blendFactor
         {
-            var delta = Mathf.Abs(elevation2 - elevation1);
-            switch (delta)
+            get
             {
-                case 0: // same elevation
-                    return HexEdgeType.Flat;
-                case 1:
-                    return HexEdgeType.Slope;
-                default:
-                    return HexEdgeType.Cliff;
+                VerifyParameterAssetAndThrow();
+                return parametersAsset.blendFactor;
             }
         }
 
+        public static float bridgeDesignLength
+        {
+            get
+            {
+                VerifyParameterAssetAndThrow();
+                return parametersAsset.bridgeDesignLength;
+            }
+        }
+
+        public static float cellPerturbStrength
+        {
+            get
+            {
+                VerifyParameterAssetAndThrow();
+                return parametersAsset.cellPerturbStrength;
+            }
+        }
+
+        public static int chunkSizeX
+        {
+            get
+            {
+                VerifyParameterAssetAndThrow();
+                return parametersAsset.chunkSizeX;
+            }
+        }
+
+        public static int chunkSizeZ
+        {
+            get
+            {
+                VerifyParameterAssetAndThrow();
+                return parametersAsset.chunkSizeZ;
+            }
+        }
+
+        public static float elevationPerturbStrength
+        {
+            get
+            {
+                VerifyParameterAssetAndThrow();
+                return parametersAsset.elevationPerturbStrength;
+            }
+        }
+
+        public static float elevationStep
+        {
+            get
+            {
+                VerifyParameterAssetAndThrow();
+                return parametersAsset.elevationStep;
+            }
+        }
+
+        public static float horizontalTerraceStepSize
+        {
+            get
+            {
+                VerifyParameterAssetAndThrow();
+                return parametersAsset.horizontalTerraceStepSize;
+            }
+        }
+
+        public static float innerRadius
+        {
+            get
+            {
+                VerifyParameterAssetAndThrow();
+                return parametersAsset.innerRadius;
+            }
+        }
+
+        public static float noiseScale
+        {
+            get
+            {
+                VerifyParameterAssetAndThrow();
+                return parametersAsset.noiseScale;
+            }
+        }
+
+        public static float outerRadius
+        {
+            get
+            {
+                VerifyParameterAssetAndThrow();
+                return parametersAsset.outerRadius;
+            }
+        }
+
+        public static float solidFactor
+        {
+            get
+            {
+                VerifyParameterAssetAndThrow();
+                return parametersAsset.solidFactor;
+            }
+        }
+
+        public static float streamBedElevationOffset
+        {
+            get
+            {
+                VerifyParameterAssetAndThrow();
+                return parametersAsset.streamBedElevationOffset;
+            }
+        }
+
+        public static int terracesPerSlope
+        {
+            get
+            {
+                VerifyParameterAssetAndThrow();
+                return parametersAsset.terracesPerSlope;
+            }
+        }
+
+        public static int terracedSteps
+        {
+            get
+            {
+                VerifyParameterAssetAndThrow();
+                return parametersAsset.terracedSteps;
+            }
+        }
+
+        public static float verticalTerraceStepSize
+        {
+            get
+            {
+                VerifyParameterAssetAndThrow();
+                return parametersAsset.verticalTerraceStepSize;
+            }
+        }
+
+        public static float wallElevationOffset
+        {
+            get
+            {
+                VerifyParameterAssetAndThrow();
+                return parametersAsset.wallElevationOffset;
+            }
+        }
+
+        public static float wallHeight
+        {
+            get
+            {
+                VerifyParameterAssetAndThrow();
+                return parametersAsset.wallHeight;
+            }
+        }
+
+        public static float wallThickness
+        {
+            get
+            {
+                VerifyParameterAssetAndThrow();
+                return parametersAsset.wallThickness;
+            }
+        }
+
+        public static float wallTowerThreshold
+        {
+            get
+            {
+                VerifyParameterAssetAndThrow();
+                return parametersAsset.wallTowerThreshold;
+            }
+        }
+
+        public static float wallYOffset
+        {
+            get
+            {
+                VerifyParameterAssetAndThrow();
+                return parametersAsset.wallYOffset;
+            }
+        }
+
+        public static float waterBlendFactor
+        {
+            get
+            {
+                VerifyParameterAssetAndThrow();
+                return parametersAsset.waterBlendFactor;
+            }
+        }
+
+        public static float waterFactor
+        {
+            get
+            {
+                VerifyParameterAssetAndThrow();
+                return parametersAsset.waterFactor;
+            }
+        }
+
+        public static float waterSurfaceElevationOffset
+        {
+            get
+            {
+                VerifyParameterAssetAndThrow();
+                return parametersAsset.waterSurfaceElevationOffset;
+            }
+        }
+
+        public const float innerToOuter = HexMapGenerationParameters.innerToOuter;
+        public const float outerToInner = HexMapGenerationParameters.outerToInner;
+
+
+        public static Vector3 GetBridge(HexDirection d)
+        {
+            VerifyParameterAssetAndThrow();
+            return parametersAsset.GetBridge(d);
+        }
+
+        public static Vector3 GetWaterBridge(HexDirection d)
+        {
+            VerifyParameterAssetAndThrow();
+            return parametersAsset.GetWaterBridge(d);
+        }
+
+        public static HexEdgeType GetEdgeType(int elevation1, int elevation2)
+        {
+            VerifyParameterAssetAndThrow();
+            return parametersAsset.GetEdgeType(elevation1, elevation2);
+        }
+
         public static float[] GetFeatureThresholds(int level)
-            => featureThresholds[level];
+        {
+            VerifyParameterAssetAndThrow();
+            return parametersAsset.GetFeatureThresholds(level);
+        }
 
         public static Vector3 GetFirstCorner(HexDirection d)
-            => corners[(int)d];
+        {
+            VerifyParameterAssetAndThrow();
+            return parametersAsset.GetFirstCorner(d);
+        }
 
         public static Vector3 GetFirstSolidCorner(HexDirection d)
-            => GetFirstCorner(d) * solidFactor;
+        {
+            VerifyParameterAssetAndThrow();
+            return parametersAsset.GetFirstSolidCorner(d);
+        }
 
         public static Vector3 GetFirstWaterCorner(HexDirection d)
-            => GetFirstCorner(d) * waterFactor;
+        {
+            VerifyParameterAssetAndThrow();
+            return parametersAsset.GetFirstWaterCorner(d);
+        }
 
         public static Vector3 GetSecondCorner(HexDirection d)
-            => corners[((int)d + 1) % corners.Length];
+        {
+            VerifyParameterAssetAndThrow();
+            return parametersAsset.GetSecondCorner(d);
+        }
 
         public static Vector3 GetSecondSolidCorner(HexDirection d)
-            => GetSecondCorner(d) * solidFactor;
+        {
+            VerifyParameterAssetAndThrow();
+            return parametersAsset.GetSecondSolidCorner(d);
+        }
 
         public static Vector3 GetSecondWaterCorner(HexDirection d)
-            => GetSecondCorner(d) * waterFactor;
+        {
+            VerifyParameterAssetAndThrow();
+            return parametersAsset.GetSecondWaterCorner(d);
+        }
 
         public static Vector3 GetSolidEdgeMiddle(HexDirection d)
-            => (corners[(int) d] + corners[((int)d + 1) % corners.Length])
-                   * (0.5f * solidFactor);
-
-        public static void InitializeHashGrid(int seed)
         {
-            // save off current random state
-            var oldState = Random.state;
-
-            Random.InitState(seed);
-            hashGrid = new HashGrid<HashEntry>((_) => HashEntry.Create(), seed);
-            // re-apply previous random state
-            Random.state = oldState;
+            VerifyParameterAssetAndThrow();
+            return parametersAsset.GetSolidEdgeMiddle(d);
         }
 
         public static Vector3 Perturb(Vector3 position)
         {
-            var sample = SampleNoise(position);
-            position.x += (sample.x * 2f - 1f) * cellPerturbStrength;
-            position.z += (sample.z * 2f - 1f) * cellPerturbStrength;
-            return position;
+            VerifyParameterAssetAndThrow();
+            return parametersAsset.Perturb(position);
         }
 
         public static HashEntry SampleHashGrid(Vector3 position)
-            => hashGrid?.Sample(position) ?? default(HashEntry);
+        {
+            VerifyParameterAssetAndThrow();
+            return parametersAsset.SampleHashGrid(position);
+        }
 
         public static Vector4 SampleNoise(Vector3 position)
         {
-            return noiseSource.GetPixelBilinear(
-                position.x * noiseScale,
-                position.z * noiseScale);
+            VerifyParameterAssetAndThrow();
+            return parametersAsset.SampleNoise(position);
         }
 
         public static Vector3 TerraceLerp(Vector3 a, Vector3 b, int step)
         {
-            var h = step * horizontalTerraceStepSize;
-            a.x += (b.x - a.x) * h;
-            a.z += (b.z - a.z) * h;
-            var v = ((step + 1) / 2) * verticalTerraceStepSize;
-            a.y += (b.y - a.y) * v;
-            return a;
+            VerifyParameterAssetAndThrow();
+            return parametersAsset.TerraceLerp(a, b, step);
         }
 
         public static Color TerraceLerp(Color a, Color b, int step)
         {
-            var h = step * horizontalTerraceStepSize;
-            return Color.Lerp(a, b, h);
+            VerifyParameterAssetAndThrow();
+            return parametersAsset.TerraceLerp(a, b, step);
+        }
+
+        public static Vector3 WallLerp(Vector3 near, Vector3 far)
+        {
+            VerifyParameterAssetAndThrow();
+            return parametersAsset.WallLerp(near, far);
+        }
+
+        public static Vector3 WallThicknessOffset(Vector3 near, Vector3 far)
+        {
+            VerifyParameterAssetAndThrow();
+            return parametersAsset.WallThicknessOffset(near, far);
         }
     }
 }

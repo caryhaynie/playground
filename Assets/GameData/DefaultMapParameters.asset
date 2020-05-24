@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b81ea37492eb74ce396ddc81b79ec7dc, type: 3}
+  m_Name: DefaultMapParameters
+  m_EditorClassIdentifier: 
+  cellPerturbStrength: 4
+  chunkSizeX: 5
+  chunkSizeZ: 5
+  elevationPerturbStrength: 1.5
+  elevationStep: 3
+  noiseScale: 0.003
+  outerRadius: 10
+  seed: 1234
+  solidFactor: 0.8
+  streamBedElevationOffset: -1.75
+  terracesPerSlope: 2
+  waterFactor: 0.6
+  waterSurfaceElevationOffset: -0.25
+  noiseSource: {fileID: 2800000, guid: b0b9be54d250246a6a0e3c34aab4bbe7, type: 3}
+  m_Corners:
+  - {x: 0, y: 0, z: 10}
+  - {x: 8.660254, y: 0, z: 5}
+  - {x: 8.660254, y: 0, z: -5}
+  - {x: 0, y: 0, z: -10}
+  - {x: -8.660254, y: 0, z: -5}
+  - {x: -8.660254, y: 0, z: 5}

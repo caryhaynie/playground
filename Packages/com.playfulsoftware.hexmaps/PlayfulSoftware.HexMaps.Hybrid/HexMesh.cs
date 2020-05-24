@@ -4,16 +4,27 @@ using UnityEngine;
 
 namespace PlayfulSoftware.HexMaps.Hybrid
 {
-    [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
+    #if UNITY_EDITOR
+    using UnityEditor;
+    #endif // UNITY_EDITOR
     [DisallowMultipleComponent]
+    [ExecuteAlways]
+    [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
     public sealed class HexMesh : MonoBehaviour
     {
-        public bool useCollider;
-        public bool useColors;
-        public bool useUVCoordinates;
-        public bool useUV2Coordinates;
+        #pragma warning disable 0649
+        [SerializeField]
+        private MeshUsageOptions m_Options;
+        #pragma warning restore 0649
 
+        public bool useCollider => m_Options.HasFlag(MeshUsageOptions.Collider);
+        public bool useColors => m_Options.HasFlag(MeshUsageOptions.Colors);
+        public bool useUVCoordinates => m_Options.HasFlag(MeshUsageOptions.UV);
+        public bool useUV2Coordinates => m_Options.HasFlag(MeshUsageOptions.UV2);
+
+        [HideInInspector,SerializeField]
         Mesh m_HexMesh;
+        [HideInInspector,SerializeField]
         MeshCollider m_MeshCollider;
 
         [NonSerialized] private List<Vector3> m_Vertices;
@@ -22,12 +33,33 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         [NonSerialized] private List<Vector2> m_UVs;
         [NonSerialized] private List<Vector2> m_UV2s;
 
+        public bool LogMeshStatsOnAwake;
+
+        #if UNITY_EDITOR
+        void OnValidate()
+        {
+
+        }
+        #endif // UNITY_EDITOR
+
         void Awake()
         {
-            GetComponent<MeshFilter>().mesh = m_HexMesh = new Mesh();
-            m_HexMesh.name = "Hex Mesh";
-            if (useCollider)
+            if (LogMeshStatsOnAwake)
+                LogMeshStats();
+            if (!m_HexMesh)
+                SetMeshInternal(new Mesh(), "Hex Mesh");
+            if (useCollider && !m_MeshCollider)
                 m_MeshCollider = gameObject.AddComponent<MeshCollider>();
+        }
+
+        internal void SetMeshInternal(Mesh mesh, string meshName = null)
+        {
+            if (Application.IsPlaying(gameObject))
+                GetComponent<MeshFilter>().mesh = m_HexMesh = new Mesh();
+            else
+                GetComponent<MeshFilter>().sharedMesh = m_HexMesh = new Mesh();
+            if (!string.IsNullOrEmpty(meshName))
+                m_HexMesh.name = meshName;
         }
 
         public void Apply()
@@ -56,6 +88,14 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             m_HexMesh.RecalculateNormals();
             if (useCollider)
                 m_MeshCollider.sharedMesh = m_HexMesh;
+#if UNITY_EDITOR
+            if (!Application.IsPlaying(gameObject))
+            {
+                EditorUtility.SetDirty(this);
+                EditorUtility.SetDirty(m_HexMesh);
+            }
+#endif // UNITY_EDITOR
+
         }
 
         public void Clear()
@@ -211,6 +251,19 @@ namespace PlayfulSoftware.HexMaps.Hybrid
                 new Vector2(uMax, vMin),
                 new Vector2(uMin, vMax),
                 new Vector2(uMax, vMax));
+        }
+
+        void LogMeshStats()
+        {
+            if (!m_HexMesh)
+            {
+                DebugHelper.LogErrorNoStacktrace("No HexMesh!");
+                return;
+            }
+
+            var chunkName = transform.parent.name;
+            DebugHelper.LogNoStacktrace($"{name} for {chunkName}");
+            DebugHelper.LogNoStacktrace($"\tVert Count: {m_HexMesh.vertexCount}");
         }
     }
 }

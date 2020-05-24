@@ -1,14 +1,17 @@
 using System;
-
+using UnityEngine;
 using UVector3 = UnityEngine.Vector3;
 
 namespace PlayfulSoftware.HexMaps.Hybrid
 {
+    [Serializable]
     internal sealed class HashGrid<T>
     {
         const int defaultGridAxisSize = 256;
 
+        [SerializeField]
         readonly int m_AxisLength;
+        [SerializeField]
         readonly T[] m_Grid;
 
         public float Scale { get; set; } = 0.25f;

@@ -1,16 +1,32 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace PlayfulSoftware.HexMaps.Hybrid
 {
+#if UNITY_EDITOR
+    using UnityEditor;
+    using UnityEditor.SceneManagement;
+
+    [CustomEditor(typeof(HexGridChunk))]
+    sealed class HexGridChunkEditor : Editor
+    {
+    }
+#endif // UNITY_EDITOR
+    [ExecuteAlways]
     public sealed class HexGridChunk : MonoBehaviour
     {
+        [SerializeField]
         private HexCell[] m_Cells;
+        [SerializeField]
         private Canvas m_GridCanvas;
 
+        public ChunkMeshData meshData;
+
         public HexMesh estuaries;
-        public HexMesh terrain;
         public HexMesh rivers;
         public HexMesh roads;
+        public HexMesh terrain;
+        public HexMesh walls;
         public HexMesh water;
         public HexMesh waterShore;
 
@@ -18,9 +34,10 @@ namespace PlayfulSoftware.HexMaps.Hybrid
 
         void Awake()
         {
-            m_GridCanvas = GetComponentInChildren<Canvas>();
-
-            m_Cells = new HexCell[HexMetrics.chunkSizeX * HexMetrics.chunkSizeZ];
+            if (!m_GridCanvas)
+                m_GridCanvas = GetComponentInChildren<Canvas>();
+            if (m_Cells.IsNullOrEmpty())
+                m_Cells = new HexCell[HexMetrics.chunkSizeX * HexMetrics.chunkSizeZ];
             ShowUI(false);
         }
 
@@ -44,8 +61,22 @@ namespace PlayfulSoftware.HexMaps.Hybrid
 
         void LateUpdate()
         {
-            Triangulate();
+#if UNITY_EDITOR
+            if (!ShouldPerformChunkUpdate())
+                return;
+            if (!Application.IsPlaying(gameObject))
+                Undo.RecordObject(gameObject, "Chunk Updated");
+#endif // UNITY_EDITOR
+            if (HasValidCellArray())
+                Triangulate();
             enabled = false;
+        }
+
+        bool CanAddBridge(HexCell cell, HexDirection dir)
+        {
+            if (cell.incomingRiver != dir.Next())
+                return false;
+            return cell.HasRoadThroughEdge(dir.Next2()) || cell.HasRoadThroughEdge(dir.Opposite());
         }
 
         bool CanAddFeature(HexCell cell, HexDirection dir)
@@ -55,7 +86,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
 
         bool CanAddFeatureToCenter(HexCell cell)
         {
-            return !cell.isUnderWater && !cell.hasRiver && !cell.HasRoads;
+            return !cell.hasRiver && !cell.HasRoads;
         }
 
         Vector2 GetRoadInterpolators(HexDirection dir, HexCell cell)
@@ -70,6 +101,23 @@ namespace PlayfulSoftware.HexMaps.Hybrid
                 return interp;
             }
         }
+
+        bool HasValidCellArray()
+        {
+            if (m_Cells == null)
+                return false;
+            if (m_Cells.Length == 0)
+                return false;
+            foreach (var cell in m_Cells)
+                if (!cell)
+                    return false;
+            return true;
+        }
+
+#if UNITY_EDITOR
+        bool ShouldPerformChunkUpdate()
+            => Application.IsPlaying(gameObject) || StageUtility.GetCurrentStageHandle() == StageUtility.GetMainStageHandle();
+#endif // UNITY_EDITOR
 
         void Triangulate()
         {
@@ -102,12 +150,13 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         void Triangulate(HexCell cell)
         {
             for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++)
-            {
                 Triangulate(d, cell);
-            }
-            if (CanAddFeatureToCenter(cell))
+            if (!cell.isUnderWater)
             {
-                features.AddFeature(cell, cell.position);
+                if (CanAddFeatureToCenter(cell))
+                    features.AddFeature(cell, cell.position);
+                if (cell.isSpecial)
+                    features.AddSpecialFeature(cell, cell.position);
             }
         }
 
@@ -231,7 +280,10 @@ namespace PlayfulSoftware.HexMaps.Hybrid
                 el.v1 + bridge,
                 el.v5 + bridge);
 
-            if (cell.HasRiverThroughEdge(direction))
+            var hasRiver = cell.HasRiverThroughEdge(direction);
+            var hasRoad = cell.HasRoadThroughEdge(direction);
+
+            if (hasRiver)
             {
                 el2.v3.y = neighbor.streamBedY;
 
@@ -258,15 +310,18 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             }
 
             if (cell.GetEdgeType(direction) == HexEdgeType.Slope)
-                TriangulateEdgeTerraces(el, cell, el2, neighbor, cell.HasRoadThroughEdge(direction));
+                TriangulateEdgeTerraces(el, cell, el2, neighbor, hasRoad);
             else
             {
-                TriangulateEdgeStrip(el, cell.color, el2, neighbor.color, cell.HasRoadThroughEdge(direction));
+                TriangulateEdgeStrip(el, cell.color, el2, neighbor.color, hasRoad);
             }
+
+            features.AddWall(el, cell, el2, neighbor, hasRiver, hasRoad);
 
             var next_d = direction.Next();
             var nextNeighbor = cell.GetNeighbor(next_d);
-            if (direction <= HexDirection.E && nextNeighbor != null)
+
+            if (direction <= HexDirection.E && nextNeighbor)
             {
                 var v5 = el.v5 + HexMetrics.GetBridge(next_d);
                 v5.y = nextNeighbor.position.y;
@@ -326,6 +381,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
                 terrain.AddTriangle(bottom, left, right);
                 terrain.AddTriangleColor(bottomCell.color, leftCell.color, rightCell.color);
             }
+            features.AddWall(bottom, bottomCell, left, leftCell, right, rightCell);
         }
 
         void TriangulateCornerTerracesCliff(
@@ -581,6 +637,8 @@ namespace PlayfulSoftware.HexMaps.Hybrid
                 }
 
                 roadCenter += corner * 0.5f;
+                if (CanAddBridge(cell, dir))
+                    features.AddBridge(roadCenter, center - corner * 0.5f);
                 center += corner * 0.25f;
             }
             else if (cell.incomingRiver == cell.outgoingRiver.Previous())
@@ -612,7 +670,13 @@ namespace PlayfulSoftware.HexMaps.Hybrid
                     !cell.HasRoadThroughEdge(middle.Previous()) &&
                     !cell.HasRoadThroughEdge(middle.Next()))
                     return;
-                roadCenter += HexMetrics.GetSolidEdgeMiddle(middle) * 0.25f;
+                var offset = HexMetrics.GetSolidEdgeMiddle(middle);
+                roadCenter += offset * 0.25f;
+                if (dir == middle &&
+                    cell.HasRoadThroughEdge(dir.Opposite()))
+                    features.AddBridge(
+                        roadCenter,
+                        center - offset * (HexMetrics.innerToOuter * 0.7f));
             }
             var mL = Vector3.Lerp(roadCenter, e.v1, interpolators.x);
             var mR = Vector3.Lerp(roadCenter, e.v5, interpolators.y);

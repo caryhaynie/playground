@@ -7,17 +7,97 @@ namespace PlayfulSoftware.HexMaps.Hybrid
     using UnityEditor;
 
     [CustomPropertyDrawer(typeof(HexCell.RiverState))]
-    class RiverStateDrawer : PropertyDrawer
+    sealed class RiverStateDrawer : PropertyDrawer
     {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             var dir = (HexDirection)property.FindPropertyRelative("direction").enumValueIndex;
             var enabled = property.FindPropertyRelative("exists").boolValue;
-            position = EditorGUI.PrefixLabel(position, label);
-            GUI.Label(position, enabled ? $"{dir}" : "None");
+            EditorGUI.LabelField(position, label, new GUIContent(enabled ? $"{dir}" : "None"));
+        }
+    }
+
+    [CustomEditor(typeof(HexCell))]
+    sealed class HexCellEditor : Editor
+    {
+        private SerializedProperty m_CoordinatesProp;
+        private SerializedProperty m_ChunkProp;
+        private SerializedProperty m_UIRectProp;
+        private SerializedProperty m_NeighborsProp;
+        private SerializedProperty m_RoadsProp;
+        private SerializedProperty m_ColorProp;
+        private SerializedProperty m_ElevationProp;
+        private SerializedProperty m_WaterLevelProp;
+
+        private Lazy<GUIStyle> centeredLabel =
+            new Lazy<GUIStyle>(() =>
+            {
+                var style = new GUIStyle(GUI.skin.label);
+                style.alignment = TextAnchor.MiddleCenter;
+                return style;
+            });
+
+        // overrides the base class with the usefully typed version.
+        private new HexCell target => (HexCell) base.target;
+
+        void OnEnable()
+        {
+            m_CoordinatesProp = serializedObject.FindProperty("coordinates");
+            m_ChunkProp = serializedObject.FindProperty("chunk");
+            m_UIRectProp = serializedObject.FindProperty("uiRect");
+            m_NeighborsProp = serializedObject.FindProperty("m_Neighbors");
+            m_RoadsProp = serializedObject.FindProperty("m_Roads");
+            m_ColorProp = serializedObject.FindProperty("m_Color");
+            m_ElevationProp = serializedObject.FindProperty("m_Elevation");
+            m_WaterLevelProp = serializedObject.FindProperty("m_WaterLevel");
+        }
+
+        public override void OnInspectorGUI()
+        {
+            serializedObject.Update();
+            EditorGUILayout.PropertyField(m_CoordinatesProp);
+            using (new EditorGUI.DisabledScope(true))
+            {
+                EditorGUILayout.PropertyField(m_ChunkProp);
+                EditorGUILayout.PropertyField(m_UIRectProp);
+                m_NeighborsProp.isExpanded = true;
+                EditorGUILayout.PropertyField(m_NeighborsProp);
+            }
+
+            LevelControl(m_ElevationProp);
+            LevelControl(m_WaterLevelProp);
+
+            bool shouldRefresh = serializedObject.hasModifiedProperties;
+            serializedObject.ApplyModifiedProperties();
+            if (shouldRefresh)
+                target.Refresh();
+        }
+
+        void LevelControl(SerializedProperty prop)
+        {
+            using (new GUILayout.HorizontalScope())
+            {
+                EditorGUILayout.PrefixLabel($"{prop.displayName}");
+
+                if (GUILayout.Button("-"))
+                {
+                    prop.intValue--;
+                }
+                GUILayout.Label($"{prop.intValue}", centeredLabel.Value);
+                if (GUILayout.Button("+"))
+                {
+                    prop.intValue++;
+                }
+            }
+        }
+
+        void OnSceneGUI()
+        {
+
         }
     }
 #endif // UNITY_EDITOR
+    [ExecuteAlways]
     public sealed class HexCell : MonoBehaviour
     {
         [Serializable]
@@ -37,16 +117,16 @@ namespace PlayfulSoftware.HexMaps.Hybrid
 
         [SerializeField] Color m_Color;
         [SerializeField] int m_Elevation = Int32.MinValue;
-
-        [Header("Water")]
-        [SerializeField] RiverState m_IncomingRiver;
-        [SerializeField] RiverState m_OutgoingRiver;
         [SerializeField] int m_WaterLevel;
 
-        [Header("Features")]
+        [SerializeField] RiverState m_IncomingRiver;
+        [SerializeField] RiverState m_OutgoingRiver;
+
         [SerializeField] int m_FarmLevel;
         [SerializeField] int m_PlantLevel;
+        [SerializeField] int m_SpecialIndex;
         [SerializeField] int m_UrbanLevel;
+        [SerializeField] bool m_Walled;
 
         public Color color
         {
@@ -64,37 +144,13 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         public int elevation
         {
             get => m_Elevation;
-            set
-            {
-                if (m_Elevation == value)
-                    return;
-                m_Elevation = value;
-
-                // verify rivers
-                RemoveRiversIfInvalid();
-
-                // verify roads
-                RemoveRoadsIfInvalid();
-
-                // Update Transform
-                var pos = transform.localPosition;
-                pos.y = m_Elevation * HexMetrics.elevationStep;
-                pos.y +=
-                    (HexMetrics.SampleNoise(pos).y * 2f - 1f) *
-                    HexMetrics.elevationPerturbStrength;
-                transform.localPosition = pos;
-
-                // Update UI Transform
-                var uiPosition = uiRect.localPosition;
-                uiPosition.z = -pos.y;
-                uiRect.localPosition = uiPosition;
-                Refresh();
-            }
+            set => SetElevationInternal(value);
         }
 
         public bool hasIncomingRiver => m_IncomingRiver.exists;
         public bool hasOutgoingRiver => m_OutgoingRiver.exists;
         public HexDirection incomingRiver => m_IncomingRiver.direction;
+        public bool isSpecial => m_SpecialIndex > 0;
         public bool isUnderWater => m_WaterLevel > m_Elevation;
         public HexDirection outgoingRiver => m_OutgoingRiver.direction;
 
@@ -102,9 +158,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         public bool hasRiverBeginOrEnd => hasIncomingRiver != hasOutgoingRiver;
 
         public Vector3 position => transform.localPosition;
-
         public HexDirection riverBeginOrEndDirection => hasIncomingRiver ? incomingRiver : outgoingRiver;
-
         public float riverSurfaceY => (elevation + HexMetrics.waterSurfaceElevationOffset) * HexMetrics.elevationStep;
         public float streamBedY => (elevation + HexMetrics.streamBedElevationOffset) * HexMetrics.elevationStep;
 
@@ -132,6 +186,19 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             }
         }
 
+        public int specialIndex
+        {
+            get => m_SpecialIndex;
+            set
+            {
+                if (m_SpecialIndex == value || hasRiver)
+                    return;
+                m_SpecialIndex = value;
+                RemoveRoads();
+                RefreshSelfOnly();
+            }
+        }
+
         public int urbanLevel
         {
             get => m_UrbanLevel;
@@ -147,17 +214,22 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         public int waterLevel
         {
             get => m_WaterLevel;
-            set
-            {
-                if (m_WaterLevel == value)
-                    return;
-                m_WaterLevel = value;
-                RemoveRiversIfInvalid();
-                Refresh();
-            }
+            set => SetWaterLevelInternal(value);
         }
 
         public float waterSurfaceY => (waterLevel + HexMetrics.waterSurfaceElevationOffset) * HexMetrics.elevationStep;
+
+        public bool walled
+        {
+            get => m_Walled;
+            set
+            {
+                if (m_Walled == value)
+                    return;
+                m_Walled = value;
+                Refresh();
+            }
+        }
 
 #if UNITY_EDITOR
         void Reset()
@@ -169,12 +241,16 @@ namespace PlayfulSoftware.HexMaps.Hybrid
 
         public void AddRoad(HexDirection dir)
         {
-            if (!m_Roads[(int) dir]
-                && !HasRiverThroughEdge(dir)
-                && GetElevationDifference(dir) <= 1)
-            {
+            if (CanAddRoad(dir))
                 SetRoad((int)dir, true);
-            }
+        }
+
+        bool CanAddRoad(HexDirection dir)
+        {
+            if (m_Roads[(int) dir]) return false;
+            if (HasRiverThroughEdge(dir)) return false;
+            if (GetElevationDifference(dir) > 1) return false;
+            return !isSpecial && !GetNeighbor(dir).isSpecial;
         }
 
         public HexEdgeType GetEdgeType(HexCell otherCell)
@@ -295,6 +371,33 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             }
         }
 
+        internal void SetElevationInternal(int value)
+        {
+            if (m_Elevation == value)
+                return;
+            m_Elevation = value;
+
+            // verify rivers
+            RemoveRiversIfInvalid();
+
+            // verify roads
+            RemoveRoadsIfInvalid();
+
+            // Update Transform
+            var pos = transform.localPosition;
+            pos.y = m_Elevation * HexMetrics.elevationStep;
+            pos.y +=
+                (HexMetrics.SampleNoise(pos).y * 2f - 1f) *
+                HexMetrics.elevationPerturbStrength;
+            transform.localPosition = pos;
+
+            // Update UI Transform
+            var uiPosition = uiRect.localPosition;
+            uiPosition.z = -pos.y;
+            uiRect.localPosition = uiPosition;
+            Refresh();
+        }
+
         public void SetNeighbor(HexDirection direction, HexCell cell)
         {
             m_Neighbors[(int) direction] = cell;
@@ -323,6 +426,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             // actually update the river state now, and refresh.
             m_OutgoingRiver.exists = true;
             m_OutgoingRiver.direction = dir;
+            m_SpecialIndex = 0;
 
             // update our neighbor too.
             if (!neighbor)
@@ -330,11 +434,21 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             neighbor.RemoveIncomingRiver();
             neighbor.m_IncomingRiver.exists = true;
             neighbor.m_IncomingRiver.direction = dir.Opposite();
+            neighbor.m_SpecialIndex = 0;
 
             SetRoad((int)dir, false);
         }
 
-        void Refresh()
+        internal void SetWaterLevelInternal(int value)
+        {
+            if (m_WaterLevel == value)
+                return;
+            m_WaterLevel = value;
+            RemoveRiversIfInvalid();
+            Refresh();
+        }
+
+        internal void Refresh()
         {
             if (!chunk) return;
             chunk.Refresh();

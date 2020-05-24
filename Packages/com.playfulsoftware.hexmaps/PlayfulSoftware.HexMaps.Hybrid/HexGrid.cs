@@ -1,11 +1,82 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace PlayfulSoftware.HexMaps.Hybrid
 {
+#if UNITY_EDITOR
+    using UnityEditor;
+
+    [CustomEditor(typeof(HexGrid))]
+    internal sealed class HexGridEditor : Editor
+    {
+        const string kShouldShowInspectorKey = "HexGridEditor_ShouldShowInspector";
+
+        private SerializedProperty m_CellsProp;
+        private SerializedProperty m_ChunksProp;
+
+        internal bool ShouldShowInspector
+        {
+            get => SessionState.GetBool(kShouldShowInspectorKey, false);
+            set => SessionState.SetBool(kShouldShowInspectorKey, value);
+        }
+
+        private HexGrid typedTarget => (HexGrid)target;
+
+        void OnEnable()
+        {
+            m_CellsProp = serializedObject.FindProperty("m_Cells");
+            m_ChunksProp = serializedObject.FindProperty("m_Chunks");
+        }
+
+        public override void OnInspectorGUI()
+        {
+            var grid = typedTarget;
+            using (var check = new EditorGUI.ChangeCheckScope())
+            {
+                bool showInspector = EditorGUILayout.Foldout(ShouldShowInspector, "Inspector Values");
+                if (check.changed)
+                    ShouldShowInspector = showInspector;
+            }
+
+            if (ShouldShowInspector)
+                DrawDefaultInspector();
+            if (GUILayout.Button("Rebuild Hex Map"))
+            {
+                Undo.RecordObject(grid, "Rebuild Hex Map");
+                grid.RebuildGrid(forceRebuild: true);
+                EditorUtility.SetDirty(grid);
+            }
+
+            var childChunks = m_ChunksProp.arraySize;
+            EditorGUILayout.LabelField($"Existing Chunks: {childChunks}");
+            using (new EditorGUI.DisabledScope(childChunks == 0))
+            {
+                if (GUILayout.Button("Delete Existing Chunks"))
+                {
+                    Undo.RecordObject(grid, "Delete Existing Chunks");
+                    grid.RemoveExistingChunks();
+                }
+            }
+
+        }
+
+        private bool HasCreatedChunks()
+        {
+            var obj = typedTarget;
+            if (!obj) return false;
+            if (m_ChunksProp == null) return false;
+            if (!m_ChunksProp.isArray) return false;
+            return m_ChunksProp.arraySize != 0;
+        }
+    }
+#endif // UNITY_EDITOR
+    [ExecuteAlways]
     public sealed class HexGrid : MonoBehaviour
     {
+        [HideInInspector,SerializeField]
         private int m_CellCountX;
+        [HideInInspector,SerializeField]
         private int m_CellCountZ;
         [SerializeField]
         private int m_ChunkCountX;
@@ -19,12 +90,16 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         private Text m_CellLabelPrefab;
         [SerializeField]
         private HexGridChunk m_ChunkPrefab;
+#pragma warning disable 0649
         [SerializeField]
-        private Texture2D m_NoiseSource;
+        private HexMapGenerationParameters m_ParametersAsset;
+#pragma warning restore 0649
 
         public int seed;
 
+        [HideInInspector,SerializeField]
         private HexCell[] m_Cells;
+        [HideInInspector,SerializeField]
         private HexGridChunk[] m_Chunks;
 
         private int cellCountX => m_CellCountX;
@@ -47,22 +122,26 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         public HexCell cellPrefab => m_CellPrefab;
         public Text cellLabelPrefab => m_CellLabelPrefab;
         public HexGridChunk chunkPrefab => m_ChunkPrefab;
-        public Texture2D noiseSource
-        {
-            get => m_NoiseSource;
-            set => m_NoiseSource = value;
-        }
+
+        bool IsInPlayMode => Application.IsPlaying(gameObject);
 
         void Awake()
         {
-            HexMetrics.noiseSource = m_NoiseSource;
-            HexMetrics.InitializeHashGrid(seed);
+            if (IsInPlayMode)
+                AwakePlaymode();
+            else
+                AwakeEditmode();
+        }
 
-            m_CellCountX = m_ChunkCountX * HexMetrics.chunkSizeX;
-            m_CellCountZ = m_ChunkCountZ * HexMetrics.chunkSizeZ;
+        void AwakeEditmode()
+        {
+        }
 
-            CreateChunks();
-            CreateCells();
+        void AwakePlaymode()
+        {
+            SetParameters(forceOverride: true);
+
+            RebuildGrid();
         }
 
         void AddCellToChunk(int x, int z, HexCell cell)
@@ -99,6 +178,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             HexCell cell = m_Cells[i] = Instantiate<HexCell>(m_CellPrefab);
             cell.transform.localPosition = position;
             cell.coordinates = HexCoordinates.FromOffsetCoordinates(x, z);
+            cell.name = $"Cell #{i} {cell.coordinates}";
             cell.color = defaultColor;
 
 
@@ -145,6 +225,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
                 for (int x = 0; x < chunkCountX; x++)
                 {
                     HexGridChunk chunk = m_Chunks[i++] = Instantiate(m_ChunkPrefab);
+                    chunk.name = $"Chunk #{i}";
                     chunk.transform.SetParent(transform);
                 }
             }
@@ -152,21 +233,82 @@ namespace PlayfulSoftware.HexMaps.Hybrid
 
         void OnEnable()
         {
-            if (!HexMetrics.noiseSource)
+            SetParameters();
+        }
+
+        internal void RebuildGrid(bool forceRebuild = false)
+        {
+            var gridExists = m_Chunks != null && m_Chunks.Length > 0;
+            if (gridExists && !forceRebuild)
+                return;
+            RemoveExistingChunks();
+            m_CellCountX = m_ChunkCountX * HexMetrics.chunkSizeX;
+            m_CellCountZ = m_ChunkCountZ * HexMetrics.chunkSizeZ;
+
+            CreateChunks();
+            CreateCells();
+        }
+
+        internal void RemoveExistingChunks()
+        {
+            foreach (var chunk in m_Chunks)
             {
-                HexMetrics.noiseSource = m_NoiseSource;
-                HexMetrics.InitializeHashGrid(seed);
+                if (!chunk) continue;
+                GameObjectUtility.SafelyDeleteGameObject(chunk.gameObject);
             }
+            m_Chunks = new HexGridChunk[0];
+        }
+
+        void SetParameters(bool forceOverride = false)
+        {
+            if (!m_ParametersAsset)
+                return;
+            if (forceOverride || !HexMetrics.parametersAsset)
+                HexMetrics.parametersAsset = m_ParametersAsset;
+        }
+
+#if UNITY_EDITOR
+        void OnValidate()
+        {
+
+        }
+
+        string PackagePrefab(string prefab) =>
+            $"Packages/com.playfulsoftware.hexmaps/Prefabs/{prefab}";
+
+        internal void RemoveExistingCells()
+        {
+            if (IsInPlayMode)
+                throw new Exception("This method should not be called from play mode");
+            foreach (var cell in m_Cells)
+            {
+                if (!cell) continue;
+                DestroyImmediate(cell.gameObject);
+            }
+            m_Cells = new HexCell[0];
         }
 
         void Reset()
         {
             m_ChunkCountX = 6;
             m_ChunkCountZ = 6;
-            m_CellPrefab = null;
-            m_CellLabelPrefab = null;
-            m_ChunkPrefab = null;
+            if (!m_CellLabelPrefab)
+                m_CellLabelPrefab =
+                    AssetDatabase.LoadAssetAtPath<Text>(PackagePrefab("CellLabel.Prefab"));
+            if (!m_CellPrefab)
+                m_CellPrefab =
+                    AssetDatabase.LoadAssetAtPath<HexCell>(PackagePrefab("HexCellPrefab.prefab"));
+            if (!m_ChunkPrefab)
+                m_ChunkPrefab =
+                    AssetDatabase.LoadAssetAtPath<HexGridChunk>(PackagePrefab("GridChunkPrefab.prefab"));
         }
+
+        void Update()
+        {
+
+        }
+
+#endif // UNITY_EDITOR
 
         public HexCell GetCell(Vector3 position)
         {

@@ -1,12 +1,12 @@
-using System;
-using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace PlayfulSoftware.HexMaps.Hybrid
 {
     public sealed class HexMapCamera : MonoBehaviour
     {
-        Transform m_Swivel, m_Stick;
+        Transform m_Stick;
+        Transform m_Swivel;
         float m_RotationAngle;
         float m_Zoom = 1f;
 
@@ -18,18 +18,18 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         public float rotationSpeed;
 
         [Header("Stick Controls")]
-        public float stickMinZoom;
-        public float stickMaxZoom;
+        [FormerlySerializedAs("stickMinZoom")] public float stickMinZoomDistance;
+        [FormerlySerializedAs("stickMaxZoom")] public float stickMaxZoomDistance;
         [Header("Swivel Controls")]
-        public float swivelMinZoom;
-        public float swivelMaxZoom;
+        [FormerlySerializedAs("swivelMinZoom")] public float swivelMinZoomAngle;
+        [FormerlySerializedAs("swivelMaxZoom")] public float swivelMaxZoomAngle;
 
         void Awake()
         {
             m_Swivel = transform.GetChild(0);
             if (m_Swivel)
                 m_Stick = m_Swivel.GetChild(0);
-            
+
             AdjustZoom(m_Zoom);
         }
 
@@ -38,10 +38,10 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             moveSpeedMinZoom = 400f;
             moveSpeedMaxZoom = 100f;
             rotationSpeed = 100f;
-            stickMinZoom = -250f;
-            stickMaxZoom = -45f;
-            swivelMinZoom = 90f;
-            swivelMaxZoom = 45f;
+            stickMinZoomDistance = -250f;
+            stickMaxZoomDistance = -45f;
+            swivelMinZoomAngle = 90f;
+            swivelMaxZoomAngle = 45f;
         }
 
         void Update()
@@ -53,7 +53,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             float rotationDelta = Input.GetAxis("Rotation");
             if (rotationDelta != 0f)
                 AdjustRotation(rotationDelta);
-            
+
             float xDelta = Input.GetAxis("Horizontal");
             float zDelta = Input.GetAxis("Vertical");
             if (xDelta != 0f || zDelta != 0f)
@@ -82,10 +82,10 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         {
             m_Zoom = Mathf.Clamp01(m_Zoom + delta);
 
-            float distance = Mathf.Lerp(stickMinZoom, stickMaxZoom, m_Zoom);
+            float distance = Mathf.Lerp(stickMinZoomDistance, stickMaxZoomDistance, m_Zoom);
             m_Stick.localPosition = new Vector3(0f, 0f, distance);
 
-            float angle = Mathf.Lerp(swivelMinZoom, swivelMaxZoom, m_Zoom);
+            float angle = Mathf.Lerp(swivelMinZoomAngle, swivelMaxZoomAngle, m_Zoom);
             m_Swivel.localRotation = Quaternion.Euler(angle, 0f, 0f);
         }
 

@@ -14,8 +14,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             int x = property.FindPropertyRelative("m_X").intValue;
             int z = property.FindPropertyRelative("m_Z").intValue;
             int y = -x - z;
-            position = EditorGUI.PrefixLabel(position, label);
-            GUI.Label(position, string.Format("{0}, {1}, {2}", x, y, z));
+            EditorGUI.LabelField(position, label, new GUIContent($"{x}, {y}, {z}"));
         }
     }
 #endif // UNITY_EDITOR
@@ -83,12 +82,12 @@ namespace PlayfulSoftware.HexMaps.Hybrid
 
         public override string ToString()
         {
-            return string.Format("({0}, {1}, {2})", x, y, z);
+            return $"({x}, {y}, {z})";
         }
 
         public string ToStringOnSeparateLines()
         {
-            return string.Format("{0}\n{1}\n{2}", x, y, z);
+            return $"{x}\n{y}\n{z}";
         }
     }
 }

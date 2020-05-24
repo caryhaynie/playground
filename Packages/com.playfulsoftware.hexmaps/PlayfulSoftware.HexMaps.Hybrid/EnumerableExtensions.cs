@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace PlayfulSoftware.HexMaps.Hybrid
 {
-    internal static class EnumerableExtensions
+    static class EnumerableExtensions
     {
         public static IEnumerable<TResult> Pairwise<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, TSource, TResult> selector)
         {
