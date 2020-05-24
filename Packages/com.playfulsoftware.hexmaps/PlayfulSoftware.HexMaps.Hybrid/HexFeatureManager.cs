@@ -9,8 +9,22 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         public HexFeatureCollection[] urbanCollections;
 
         public HexMesh walls;
+        public Transform wallTower;
+        public Transform bridge;
 
         Transform m_Container;
+
+        public void AddBridge(Vector3 roadCenter1, Vector3 roadCenter2)
+        {
+            roadCenter1 = HexMetrics.Perturb(roadCenter1);
+            roadCenter2 = HexMetrics.Perturb(roadCenter2);
+            var bridgePos = (roadCenter1 + roadCenter2) * 0.5f;
+            var bridgeRot = Quaternion.FromToRotation(Vector3.forward, roadCenter2 - roadCenter1);
+            var newBridge = Instantiate(bridge, bridgePos, bridgeRot, m_Container);
+            var length = Vector3.Distance(roadCenter1, roadCenter2);
+            newBridge.localScale = new Vector3(
+                1f, 1f, length * (1f / HexMetrics.bridgeDesignLength));
+        }
 
         public void AddFeature(HexCell cell, Vector3 position)
         {
@@ -132,7 +146,11 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             if (hasLeftWall)
             {
                 if (hasRightWall)
-                    AddWallSegment(pivot, left, pivot, right);
+                {
+                    var hash = HexMetrics.SampleHashGrid((pivot + left + right) * (1f / 3f));
+                    var hasTower = CanBuildTower(hash, leftCell, rightCell, pivotCell);
+                    AddWallSegment(pivot, left, pivot, right, hasTower);
+                }
                 else if (leftCell.elevation < rightCell.elevation)
                     AddWallWedge(pivot, left, right);
                 else
@@ -145,7 +163,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
                     AddWallCap(right, pivot);
         }
 
-        void AddWallSegment(Vector3 nearLeft, Vector3 farLeft, Vector3 nearRight, Vector3 farRight)
+        void AddWallSegment(Vector3 nearLeft, Vector3 farLeft, Vector3 nearRight, Vector3 farRight, bool addTower = false)
         {
             // pre-perturb our vertices
             nearLeft = HexMetrics.Perturb(nearLeft);
@@ -182,6 +200,14 @@ namespace PlayfulSoftware.HexMaps.Hybrid
 
             // add a wall top too!
             walls.AddQuadUnperturbed(t1, t2, v3, v4);
+
+            if (!addTower) return;
+
+            var towerPos = (left + right) * 0.5f;
+            var rightDir = right - left;
+            rightDir.y = 0;
+            var towerRot = Quaternion.FromToRotation(Vector3.right, rightDir);
+            Instantiate(wallTower, towerPos, towerRot, m_Container);
         }
 
         void AddWallWedge(Vector3 near, Vector3 far, Vector3 point)
@@ -203,6 +229,13 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             walls.AddQuadUnperturbed(v1, point, v3, pointTop);
             walls.AddQuadUnperturbed(point, v2, pointTop, v4);
             walls.AddTriangleUnperturbed(pointTop, v3, v4);
+        }
+
+        bool CanBuildTower(in HashEntry hash, HexCell leftCell, HexCell rightCell, HexCell pivotCell)
+        {
+            if (leftCell.elevation != rightCell.elevation)
+                return false;
+            return hash.e < HexMetrics.wallTowerThreshold;
         }
 
         bool CanBuildWall(HexCell nearCell, HexCell farCell)

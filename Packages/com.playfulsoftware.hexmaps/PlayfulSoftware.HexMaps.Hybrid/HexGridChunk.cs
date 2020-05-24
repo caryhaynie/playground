@@ -72,6 +72,13 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             enabled = false;
         }
 
+        bool CanAddBridge(HexCell cell, HexDirection dir)
+        {
+            if (cell.incomingRiver != dir.Next())
+                return false;
+            return cell.HasRoadThroughEdge(dir.Next2()) || cell.HasRoadThroughEdge(dir.Opposite());
+        }
+
         bool CanAddFeature(HexCell cell, HexDirection dir)
         {
             return !cell.isUnderWater && !cell.HasRoadThroughEdge(dir);
@@ -629,6 +636,8 @@ namespace PlayfulSoftware.HexMaps.Hybrid
                 }
 
                 roadCenter += corner * 0.5f;
+                if (CanAddBridge(cell, dir))
+                    features.AddBridge(roadCenter, center - corner * 0.5f);
                 center += corner * 0.25f;
             }
             else if (cell.incomingRiver == cell.outgoingRiver.Previous())
@@ -660,7 +669,13 @@ namespace PlayfulSoftware.HexMaps.Hybrid
                     !cell.HasRoadThroughEdge(middle.Previous()) &&
                     !cell.HasRoadThroughEdge(middle.Next()))
                     return;
-                roadCenter += HexMetrics.GetSolidEdgeMiddle(middle) * 0.25f;
+                var offset = HexMetrics.GetSolidEdgeMiddle(middle);
+                roadCenter += offset * 0.25f;
+                if (dir == middle &&
+                    cell.HasRoadThroughEdge(dir.Opposite()))
+                    features.AddBridge(
+                        roadCenter,
+                        center - offset * (HexMetrics.innerToOuter * 0.7f));
             }
             var mL = Vector3.Lerp(roadCenter, e.v1, interpolators.x);
             var mR = Vector3.Lerp(roadCenter, e.v5, interpolators.y);

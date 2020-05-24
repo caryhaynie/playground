@@ -27,6 +27,15 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             }
         }
 
+        public static float bridgeDesignLength
+        {
+            get
+            {
+                VerifyParameterAssetAndThrow();
+                return parametersAsset.bridgeDesignLength;
+            }
+        }
+
         public static float cellPerturbStrength
         {
             get
@@ -177,6 +186,24 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             {
                 VerifyParameterAssetAndThrow();
                 return parametersAsset.wallThickness;
+            }
+        }
+
+        public static float wallTowerThreshold
+        {
+            get
+            {
+                VerifyParameterAssetAndThrow();
+                return parametersAsset.wallTowerThreshold;
+            }
+        }
+
+        public static float wallYOffset
+        {
+            get
+            {
+                VerifyParameterAssetAndThrow();
+                return parametersAsset.wallYOffset;
             }
         }
 

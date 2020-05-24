@@ -112,9 +112,9 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         public const float outerToInner = 0.866025404f;
         public const float innerToOuter = 1f / outerToInner;
 
+        public float bridgeDesignLength = 7f;
         [Tooltip("Constant scale factor applied to random values sampled from noise texture")]
         public float cellPerturbStrength = 4f;
-
         [Tooltip("Number of chunks to generate, horizontally")]
         public int chunkSizeX = 5;
         [Tooltip("Number of chunks to generate, vertically")]
@@ -128,8 +128,10 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         public float solidFactor = 0.8f;
         public float streamBedElevationOffset = -1.75f;
         public int terracesPerSlope = 2;
-        public float wallHeight = 3f;
+        public float wallHeight = 4f;
         public float wallThickness = 0.75f;
+        public float wallTowerThreshold = 0.75f;
+        public float wallYOffset = -1f;
         public float waterFactor = 0.6f;
         public float waterSurfaceElevationOffset = -0.25f;
 
@@ -276,12 +278,12 @@ namespace PlayfulSoftware.HexMaps.Hybrid
 
         public Vector3 WallLerp(Vector3 near, Vector3 far)
         {
-            near.x = (far.x - near.x) * 0.5f;
-            near.z = (far.z - near.z) * 0.5f;
+            near.x += (far.x - near.x) * 0.5f;
+            near.z += (far.z - near.z) * 0.5f;
             var v = (near.y < far.y)
                 ? wallElevationOffset
                 : (1f - wallElevationOffset);
-            near.y += (far.y - near.y) * v;
+            near.y += (far.y - near.y) * v + wallYOffset;
             return near;
         }
 
