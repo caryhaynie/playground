@@ -1,5 +1,7 @@
+using System.IO;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.WSA;
 
 namespace PlayfulSoftware.HexMaps.Hybrid
 {
@@ -17,8 +19,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         }
 
         #region Non-Serialized Fields
-        Color m_ActiveColor;
-        bool m_ApplyColor;
+        int m_ActiveTerrainTypeIndex;
         EditMode m_Elevation;
         EditMode m_FarmLevel;
         EditMode m_PlantLevel;
@@ -40,25 +41,12 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         #region Serialized Fields
         [SerializeField]
         HexGrid m_HexGrid;
-        [SerializeField]
-        Color[] m_Colors;
         #endregion
-
-        public Color[] colors
-        {
-            get => m_Colors;
-            set => m_Colors = value;
-        }
 
         public HexGrid hexGrid
         {
             get => m_HexGrid;
             set => m_HexGrid = value;
-        }
-
-        void Awake()
-        {
-            SelectColor(-1);
         }
 
         void HandleInput()
@@ -107,8 +95,6 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         {
             if (!cell)
                 return;
-            if (m_ApplyColor)
-                cell.color = m_ActiveColor;
             if (m_Elevation.enabled)
                 cell.elevation = m_Elevation.level;
             if (m_FarmLevel.enabled)
@@ -138,13 +124,6 @@ namespace PlayfulSoftware.HexMaps.Hybrid
                         otherCell.AddRoad(m_DragDirection);
                 }
             }
-        }
-
-        public void SelectColor(int index)
-        {
-            m_ApplyColor = index >= 0;
-            if (m_ApplyColor)
-                m_ActiveColor = m_Colors[index];
         }
 
         public void SetApplyElevation(bool toggle)
@@ -212,6 +191,10 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             m_SpecialLevel.level = (int) level;
         }
 
+        public void SetTerrainTypeIndex(int index)
+            => m_ActiveTerrainTypeIndex = index;
+
+
         public void SetUrbanLevel(float level)
         {
             m_UrbanLevel.level = (int) level;
@@ -230,6 +213,42 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         public void ShowUI(bool visible)
         {
             m_HexGrid.ShowUI(visible);
+        }
+
+        public void Load()
+        {
+            var path = Path.Combine(DefaultMapPath(), "test.map");
+            using (var reader = new BinaryReader(File.OpenRead(path)))
+            {
+                int header = reader.ReadInt32();
+                if (header == 0)
+                    hexGrid.Load(reader);
+                else
+                    Debug.LogWarning($"Unknown map format {header}");
+            }
+        }
+
+        public void Save()
+        {
+            //DebugHelper.LogNoStacktrace(DefaultMapPath());
+            var path = Path.Combine(DefaultMapPath(), "test.map");
+            using (var writer = new BinaryWriter(File.Open(path, FileMode.Create)))
+            {
+                writer.Write(0);
+                hexGrid.Save(writer);
+            }
+        }
+
+        string DefaultMapPath()
+        {
+#if UNITY_EDITOR
+            const string kPath = "Assets/GameData/Maps";
+            if (!Directory.Exists(kPath))
+                Directory.CreateDirectory(kPath);
+            return kPath;
+#else
+            return Application.persistentDataPath;
+#endif // UNITY_EDITOR
         }
 
         void Update()

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -83,8 +84,6 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         [SerializeField]
         private int m_ChunkCountZ;
         [SerializeField]
-        private Color m_DefaultColor = Color.white;
-        [SerializeField]
         private HexCell m_CellPrefab;
         [SerializeField]
         private Text m_CellLabelPrefab;
@@ -113,11 +112,6 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         {
             get => m_ChunkCountZ;
             set => m_ChunkCountZ = value;
-        }
-        public Color defaultColor
-        {
-            get => m_DefaultColor;
-            set => m_DefaultColor = value;
         }
         public HexCell cellPrefab => m_CellPrefab;
         public Text cellLabelPrefab => m_CellLabelPrefab;
@@ -179,7 +173,6 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             cell.transform.localPosition = position;
             cell.coordinates = HexCoordinates.FromOffsetCoordinates(x, z);
             cell.name = $"Cell #{i} {cell.coordinates}";
-            cell.color = defaultColor;
 
 
             if (x > 0)
@@ -334,6 +327,21 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         {
             foreach (var chunk in m_Chunks)
                 chunk.ShowUI(visible);
+        }
+
+        public void Load(BinaryReader reader)
+        {
+            foreach (var cell in m_Cells)
+                cell.Load(reader);
+
+            foreach (var chunk in m_Chunks)
+                chunk.Refresh();
+        }
+
+        public void Save(BinaryWriter writer)
+        {
+            foreach (var cell in m_Cells)
+                cell.Save(writer);
         }
     }
 }

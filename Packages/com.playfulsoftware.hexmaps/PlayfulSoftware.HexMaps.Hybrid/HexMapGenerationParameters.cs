@@ -23,6 +23,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
     internal sealed class HexMapGenerationParametersEditor : Editor
     {
         private SerializedProperty m_CellPerturbStrengthProp;
+        private SerializedProperty m_ColorsProp;
         private SerializedProperty m_CornersProp;
         private SerializedProperty m_ChunkSizeXProp;
         private SerializedProperty m_ChunkSizeZProp;
@@ -38,6 +39,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         void OnEnable()
         {
             m_CellPerturbStrengthProp = serializedObject.FindProperty("cellPerturbStrength");
+            m_ColorsProp = serializedObject.FindProperty("m_Colors");
             m_CornersProp = serializedObject.FindProperty("m_Corners");
             m_ChunkSizeXProp = serializedObject.FindProperty("chunkSizeX");
             m_ChunkSizeZProp = serializedObject.FindProperty("chunkSizeZ");
@@ -70,6 +72,12 @@ namespace PlayfulSoftware.HexMaps.Hybrid
                 EditorGUILayout.PropertyField(m_ChunkSizeXProp);
                 EditorGUILayout.PropertyField(m_ChunkSizeZProp);
                 EditorGUILayout.PropertyField(m_OuterRadiusProp);
+            }
+
+            EditorGUILayout.LabelField("Terrain Options");
+            using (new EditorGUI.IndentLevelScope())
+            {
+                EditorGUILayout.PropertyField(m_ColorsProp);
             }
 
             EditorGUILayout.LabelField("Advanced Options");
@@ -137,6 +145,9 @@ namespace PlayfulSoftware.HexMaps.Hybrid
 
         public Texture2D noiseSource;
 
+#pragma warning disable 0649
+        [SerializeField] private Color[] m_Colors;
+#pragma warning restore 0649
         [SerializeField] private Vector3[] m_Corners;
 
         private HashGrid<HashEntry> m_HashGrid;
@@ -235,6 +246,8 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         public Vector3 GetSolidEdgeMiddle(HexDirection d)
             => (m_Corners[(int) d] + m_Corners[((int)d + 1) % m_Corners.Length])
                    * (0.5f * solidFactor);
+
+        public Color GetTerrainColor(int index) => m_Colors[index];
 
         public void InitializeHashGrid(int seed)
         {

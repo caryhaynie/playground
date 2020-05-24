@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using UnityEngine;
 
 namespace PlayfulSoftware.HexMaps.Hybrid
@@ -25,7 +26,6 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         private SerializedProperty m_UIRectProp;
         private SerializedProperty m_NeighborsProp;
         private SerializedProperty m_RoadsProp;
-        private SerializedProperty m_ColorProp;
         private SerializedProperty m_ElevationProp;
         private SerializedProperty m_WaterLevelProp;
 
@@ -47,7 +47,6 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             m_UIRectProp = serializedObject.FindProperty("uiRect");
             m_NeighborsProp = serializedObject.FindProperty("m_Neighbors");
             m_RoadsProp = serializedObject.FindProperty("m_Roads");
-            m_ColorProp = serializedObject.FindProperty("m_Color");
             m_ElevationProp = serializedObject.FindProperty("m_Elevation");
             m_WaterLevelProp = serializedObject.FindProperty("m_WaterLevel");
         }
@@ -105,6 +104,26 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         {
             public HexDirection direction;
             public bool exists;
+
+            public void Load(BinaryReader reader)
+            {
+                var data = reader.ReadByte();
+                if (data >= 128)
+                {
+                    exists = true;
+                    direction = (HexDirection) (data - 128);
+                }
+                else
+                    exists = false;
+            }
+
+            public void Save(BinaryWriter writer)
+            {
+                if (exists)
+                    writer.Write((byte) (direction + 128));
+                else
+                    writer.Write((byte)0);
+            }
         }
 
         public HexCoordinates coordinates;
@@ -115,8 +134,8 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         [SerializeField] HexCell[] m_Neighbors;
         [SerializeField] bool[] m_Roads;
 
-        [SerializeField] Color m_Color;
         [SerializeField] int m_Elevation = Int32.MinValue;
+        [SerializeField] int m_TerrainTypeIndex;
         [SerializeField] int m_WaterLevel;
 
         [SerializeField] RiverState m_IncomingRiver;
@@ -130,15 +149,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
 
         public Color color
         {
-            get => m_Color;
-            set
-            {
-                if (m_Color == value)
-                    return;
-                m_Color = value;
-
-                Refresh();
-            }
+            get => HexMetrics.GetTerrainColor(m_TerrainTypeIndex);
         }
 
         public int elevation
@@ -196,6 +207,18 @@ namespace PlayfulSoftware.HexMaps.Hybrid
                 m_SpecialIndex = value;
                 RemoveRoads();
                 RefreshSelfOnly();
+            }
+        }
+
+        public int terrainTypeIndex
+        {
+            get => m_TerrainTypeIndex;
+            set
+            {
+                if (m_TerrainTypeIndex == value)
+                    return;
+                m_TerrainTypeIndex = value;
+                Refresh();
             }
         }
 
@@ -296,6 +319,22 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         bool IsValidRiverDestination(HexCell neighbor) =>
             neighbor && (elevation >= neighbor.elevation || waterLevel == neighbor.elevation);
 
+        void RefreshPosition()
+        {
+            // Update Transform
+            var pos = transform.localPosition;
+            pos.y = m_Elevation * HexMetrics.elevationStep;
+            pos.y +=
+                (HexMetrics.SampleNoise(pos).y * 2f - 1f) *
+                HexMetrics.elevationPerturbStrength;
+            transform.localPosition = pos;
+
+            // Update UI Transform
+            var uiPosition = uiRect.localPosition;
+            uiPosition.z = -pos.y;
+            uiRect.localPosition = uiPosition;
+        }
+
         public void RemoveIncomingRiver()
         {
             if (!hasIncomingRiver)
@@ -383,18 +422,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             // verify roads
             RemoveRoadsIfInvalid();
 
-            // Update Transform
-            var pos = transform.localPosition;
-            pos.y = m_Elevation * HexMetrics.elevationStep;
-            pos.y +=
-                (HexMetrics.SampleNoise(pos).y * 2f - 1f) *
-                HexMetrics.elevationPerturbStrength;
-            transform.localPosition = pos;
-
-            // Update UI Transform
-            var uiPosition = uiRect.localPosition;
-            uiPosition.z = -pos.y;
-            uiRect.localPosition = uiPosition;
+            RefreshPosition();
             Refresh();
         }
 
@@ -478,6 +506,47 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             m_Neighbors[index].m_Roads[(int) ((HexDirection) index).Opposite()] = state;
             m_Neighbors[index].RefreshSelfOnly();
             RefreshSelfOnly();
+        }
+
+        public void Load(BinaryReader reader)
+        {
+            m_TerrainTypeIndex = reader.ReadByte();
+            m_Elevation = reader.ReadByte();
+            RefreshPosition();
+            m_WaterLevel = reader.ReadByte();
+            m_UrbanLevel = reader.ReadByte();
+            m_FarmLevel = reader.ReadByte();
+            m_PlantLevel = reader.ReadByte();
+            m_SpecialIndex = reader.ReadByte();
+            m_Walled = reader.ReadBoolean();
+
+            m_IncomingRiver.Load(reader);
+            m_OutgoingRiver.Load(reader);
+
+            int roadFlags = reader.ReadByte();
+            for (int i = 0; i < m_Roads.Length; i++)
+                m_Roads[i] = (roadFlags & (1 << i)) != 0;
+        }
+
+        public void Save(BinaryWriter writer)
+        {
+            writer.Write((byte)m_TerrainTypeIndex);
+            writer.Write((byte)m_Elevation);
+            writer.Write((byte)m_WaterLevel);
+            writer.Write((byte)m_UrbanLevel);
+            writer.Write((byte)m_FarmLevel);
+            writer.Write((byte)m_PlantLevel);
+            writer.Write((byte)m_SpecialIndex);
+            writer.Write(m_Walled);
+
+            m_IncomingRiver.Save(writer);
+            m_OutgoingRiver.Save(writer);
+
+            int roadFlags = 0;
+            for (int i = 0; i < m_Roads.Length; i++)
+                if (m_Roads[i])
+                    roadFlags |= 1 << i;
+            writer.Write((byte)roadFlags);
         }
     }
 }
