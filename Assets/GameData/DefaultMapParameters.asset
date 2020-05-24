@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b81ea37492eb74ce396ddc81b79ec7dc, type: 3}
   m_Name: DefaultMapParameters
   m_EditorClassIdentifier: 
+  bridgeDesignLength: 7
   cellPerturbStrength: 4
   chunkSizeX: 5
   chunkSizeZ: 5
@@ -23,9 +24,18 @@ MonoBehaviour:
   solidFactor: 0.8
   streamBedElevationOffset: -1.75
   terracesPerSlope: 2
+  wallHeight: 3
+  wallThickness: 0.75
+  wallTowerThreshold: 0.75
+  wallYOffset: -1
   waterFactor: 0.6
   waterSurfaceElevationOffset: -0.25
   noiseSource: {fileID: 2800000, guid: b0b9be54d250246a6a0e3c34aab4bbe7, type: 3}
+  m_Colors:
+  - {r: 1, g: 1, b: 0, a: 1}
+  - {r: 0, g: 1, b: 0, a: 1}
+  - {r: 0, g: 0, b: 1, a: 1}
+  - {r: 1, g: 1, b: 1, a: 1}
   m_Corners:
   - {x: 0, y: 0, z: 10}
   - {x: 8.660254, y: 0, z: 5}

@@ -304,6 +304,12 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             return parametersAsset.GetSolidEdgeMiddle(d);
         }
 
+        public static Color GetTerrainColor(int index)
+        {
+            VerifyParameterAssetAndThrow();
+            return parametersAsset.GetTerrainColor(index);
+        }
+
         public static Vector3 Perturb(Vector3 position)
         {
             VerifyParameterAssetAndThrow();

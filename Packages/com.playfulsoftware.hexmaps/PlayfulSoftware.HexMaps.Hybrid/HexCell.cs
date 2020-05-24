@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using UnityEngine;
 
 namespace PlayfulSoftware.HexMaps.Hybrid
@@ -25,7 +26,6 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         private SerializedProperty m_UIRectProp;
         private SerializedProperty m_NeighborsProp;
         private SerializedProperty m_RoadsProp;
-        private SerializedProperty m_ColorProp;
         private SerializedProperty m_ElevationProp;
         private SerializedProperty m_WaterLevelProp;
 
@@ -47,7 +47,6 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             m_UIRectProp = serializedObject.FindProperty("uiRect");
             m_NeighborsProp = serializedObject.FindProperty("m_Neighbors");
             m_RoadsProp = serializedObject.FindProperty("m_Roads");
-            m_ColorProp = serializedObject.FindProperty("m_Color");
             m_ElevationProp = serializedObject.FindProperty("m_Elevation");
             m_WaterLevelProp = serializedObject.FindProperty("m_WaterLevel");
         }
@@ -115,8 +114,8 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         [SerializeField] HexCell[] m_Neighbors;
         [SerializeField] bool[] m_Roads;
 
-        [SerializeField] Color m_Color;
         [SerializeField] int m_Elevation = Int32.MinValue;
+        [SerializeField] int m_TerrainTypeIndex;
         [SerializeField] int m_WaterLevel;
 
         [SerializeField] RiverState m_IncomingRiver;
@@ -130,15 +129,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
 
         public Color color
         {
-            get => m_Color;
-            set
-            {
-                if (m_Color == value)
-                    return;
-                m_Color = value;
-
-                Refresh();
-            }
+            get => HexMetrics.GetTerrainColor(m_TerrainTypeIndex);
         }
 
         public int elevation
@@ -196,6 +187,18 @@ namespace PlayfulSoftware.HexMaps.Hybrid
                 m_SpecialIndex = value;
                 RemoveRoads();
                 RefreshSelfOnly();
+            }
+        }
+
+        public int terrainTypeIndex
+        {
+            get => m_TerrainTypeIndex;
+            set
+            {
+                if (m_TerrainTypeIndex == value)
+                    return;
+                m_TerrainTypeIndex = value;
+                Refresh();
             }
         }
 
@@ -296,6 +299,22 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         bool IsValidRiverDestination(HexCell neighbor) =>
             neighbor && (elevation >= neighbor.elevation || waterLevel == neighbor.elevation);
 
+        void RefreshPosition()
+        {
+            // Update Transform
+            var pos = transform.localPosition;
+            pos.y = m_Elevation * HexMetrics.elevationStep;
+            pos.y +=
+                (HexMetrics.SampleNoise(pos).y * 2f - 1f) *
+                HexMetrics.elevationPerturbStrength;
+            transform.localPosition = pos;
+
+            // Update UI Transform
+            var uiPosition = uiRect.localPosition;
+            uiPosition.z = -pos.y;
+            uiRect.localPosition = uiPosition;
+        }
+
         public void RemoveIncomingRiver()
         {
             if (!hasIncomingRiver)
@@ -383,18 +402,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             // verify roads
             RemoveRoadsIfInvalid();
 
-            // Update Transform
-            var pos = transform.localPosition;
-            pos.y = m_Elevation * HexMetrics.elevationStep;
-            pos.y +=
-                (HexMetrics.SampleNoise(pos).y * 2f - 1f) *
-                HexMetrics.elevationPerturbStrength;
-            transform.localPosition = pos;
-
-            // Update UI Transform
-            var uiPosition = uiRect.localPosition;
-            uiPosition.z = -pos.y;
-            uiRect.localPosition = uiPosition;
+            RefreshPosition();
             Refresh();
         }
 
@@ -478,6 +486,29 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             m_Neighbors[index].m_Roads[(int) ((HexDirection) index).Opposite()] = state;
             m_Neighbors[index].RefreshSelfOnly();
             RefreshSelfOnly();
+        }
+
+        public void Load(BinaryReader reader)
+        {
+            m_TerrainTypeIndex = reader.ReadInt32();
+            m_Elevation = reader.ReadInt32();
+            RefreshPosition();
+            m_WaterLevel = reader.ReadInt32();
+            m_UrbanLevel = reader.ReadInt32();
+            m_FarmLevel = reader.ReadInt32();
+            m_PlantLevel = reader.ReadInt32();
+            m_SpecialIndex = reader.ReadInt32();
+        }
+
+        public void Save(BinaryWriter writer)
+        {
+            writer.Write(m_TerrainTypeIndex);
+            writer.Write(m_Elevation);
+            writer.Write(m_WaterLevel);
+            writer.Write(m_UrbanLevel);
+            writer.Write(m_FarmLevel);
+            writer.Write(m_PlantLevel);
+            writer.Write(m_SpecialIndex);
         }
     }
 }
