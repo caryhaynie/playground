@@ -1,6 +1,6 @@
 namespace PlayfulSoftware.HexMaps
 {
-    public enum HexDirection
+    public enum HexDirection : byte
     {
         NE,
         E,
@@ -37,13 +37,13 @@ namespace PlayfulSoftware.HexMaps
 
         static HexDirection PreviousBySteps(this HexDirection direction, int steps)
         {
-            direction -= steps;
+            direction -= (byte)steps;
             return direction >= HexDirection.NE ? direction : (direction + 6);
         }
 
         static HexDirection NextBySteps(this HexDirection direction, int steps)
         {
-            direction += steps;
+            direction += (byte)steps;
             return direction <= HexDirection.NW ? direction : (direction - 6);
         }
     }
