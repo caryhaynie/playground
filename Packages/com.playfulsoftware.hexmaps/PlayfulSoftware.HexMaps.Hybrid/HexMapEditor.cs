@@ -220,7 +220,11 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             var path = Path.Combine(DefaultMapPath(), "test.map");
             using (var reader = new BinaryReader(File.OpenRead(path)))
             {
-                hexGrid.Load(reader);
+                int header = reader.ReadInt32();
+                if (header == 0)
+                    hexGrid.Load(reader);
+                else
+                    Debug.LogWarning($"Unknown map format {header}");
             }
         }
 
@@ -230,6 +234,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             var path = Path.Combine(DefaultMapPath(), "test.map");
             using (var writer = new BinaryWriter(File.Open(path, FileMode.Create)))
             {
+                writer.Write(0);
                 hexGrid.Save(writer);
             }
         }

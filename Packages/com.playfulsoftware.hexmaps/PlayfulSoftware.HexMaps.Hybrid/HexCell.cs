@@ -104,6 +104,26 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         {
             public HexDirection direction;
             public bool exists;
+
+            public void Load(BinaryReader reader)
+            {
+                var data = reader.ReadByte();
+                if (data >= 128)
+                {
+                    exists = true;
+                    direction = (HexDirection) (data - 128);
+                }
+                else
+                    exists = false;
+            }
+
+            public void Save(BinaryWriter writer)
+            {
+                if (exists)
+                    writer.Write((byte) (direction + 128));
+                else
+                    writer.Write((byte)0);
+            }
         }
 
         public HexCoordinates coordinates;
@@ -490,25 +510,43 @@ namespace PlayfulSoftware.HexMaps.Hybrid
 
         public void Load(BinaryReader reader)
         {
-            m_TerrainTypeIndex = reader.ReadInt32();
-            m_Elevation = reader.ReadInt32();
+            m_TerrainTypeIndex = reader.ReadByte();
+            m_Elevation = reader.ReadByte();
             RefreshPosition();
-            m_WaterLevel = reader.ReadInt32();
-            m_UrbanLevel = reader.ReadInt32();
-            m_FarmLevel = reader.ReadInt32();
-            m_PlantLevel = reader.ReadInt32();
-            m_SpecialIndex = reader.ReadInt32();
+            m_WaterLevel = reader.ReadByte();
+            m_UrbanLevel = reader.ReadByte();
+            m_FarmLevel = reader.ReadByte();
+            m_PlantLevel = reader.ReadByte();
+            m_SpecialIndex = reader.ReadByte();
+            m_Walled = reader.ReadBoolean();
+
+            m_IncomingRiver.Load(reader);
+            m_OutgoingRiver.Load(reader);
+
+            int roadFlags = reader.ReadByte();
+            for (int i = 0; i < m_Roads.Length; i++)
+                m_Roads[i] = (roadFlags & (1 << i)) != 0;
         }
 
         public void Save(BinaryWriter writer)
         {
-            writer.Write(m_TerrainTypeIndex);
-            writer.Write(m_Elevation);
-            writer.Write(m_WaterLevel);
-            writer.Write(m_UrbanLevel);
-            writer.Write(m_FarmLevel);
-            writer.Write(m_PlantLevel);
-            writer.Write(m_SpecialIndex);
+            writer.Write((byte)m_TerrainTypeIndex);
+            writer.Write((byte)m_Elevation);
+            writer.Write((byte)m_WaterLevel);
+            writer.Write((byte)m_UrbanLevel);
+            writer.Write((byte)m_FarmLevel);
+            writer.Write((byte)m_PlantLevel);
+            writer.Write((byte)m_SpecialIndex);
+            writer.Write(m_Walled);
+
+            m_IncomingRiver.Save(writer);
+            m_OutgoingRiver.Save(writer);
+
+            int roadFlags = 0;
+            for (int i = 0; i < m_Roads.Length; i++)
+                if (m_Roads[i])
+                    roadFlags |= 1 << i;
+            writer.Write((byte)roadFlags);
         }
     }
 }

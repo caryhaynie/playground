@@ -10,7 +10,9 @@ namespace PlayfulSoftware.HexMaps.Hybrid
     {
         public override void OnImportAsset(AssetImportContext ctx)
         {
-            var root = new GameObject("Hex Map");
+            var root = new GameObject("root");
+            var grid = new GameObject("Hex Map");
+            grid.transform.SetParent(root.transform, false);
             ctx.AddObjectToAsset("Hex Map", root);
             ctx.SetMainObject(root);
         }
