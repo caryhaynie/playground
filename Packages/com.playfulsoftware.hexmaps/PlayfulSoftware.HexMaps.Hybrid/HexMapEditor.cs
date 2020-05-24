@@ -22,6 +22,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         EditMode m_Elevation;
         EditMode m_FarmLevel;
         EditMode m_PlantLevel;
+        EditMode m_SpecialLevel;
         EditMode m_UrbanLevel;
         EditMode m_WaterLevel;
         int m_BrushSize;
@@ -118,6 +119,8 @@ namespace PlayfulSoftware.HexMaps.Hybrid
                 cell.urbanLevel = m_UrbanLevel.level;
             if (m_WaterLevel.enabled)
                 cell.waterLevel = m_WaterLevel.level;
+            if (m_SpecialLevel.enabled)
+                cell.specialIndex = m_SpecialLevel.level;
             if (m_RiverMode == OptionalToggle.No)
                 cell.RemoveRiver();
             if (m_RoadMode == OptionalToggle.No)
@@ -159,6 +162,11 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             m_PlantLevel.enabled = toggle;
         }
 
+        public void SetApplySpecialLevel(bool toggle)
+        {
+            m_SpecialLevel.enabled = toggle;
+        }
+
         public void SetApplyUrbanLevel(bool toggle)
         {
             m_UrbanLevel.enabled = toggle;
@@ -197,6 +205,11 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         public void SetPlantLevel(float level)
         {
             m_PlantLevel.level = (int) level;
+        }
+
+        public void SetSpecialLevel(float level)
+        {
+            m_SpecialLevel.level = (int) level;
         }
 
         public void SetUrbanLevel(float level)

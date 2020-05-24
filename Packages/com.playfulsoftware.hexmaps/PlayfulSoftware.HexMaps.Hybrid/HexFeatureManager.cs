@@ -12,6 +12,8 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         public Transform wallTower;
         public Transform bridge;
 
+        public Transform[] special;
+
         Transform m_Container;
 
         public void AddBridge(Vector3 roadCenter1, Vector3 roadCenter2)
@@ -28,6 +30,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
 
         public void AddFeature(HexCell cell, Vector3 position)
         {
+            if (cell.isSpecial) return;
             var hash = HexMetrics.SampleHashGrid(position);
             var prefab = PickPrefab(urbanCollections, cell.urbanLevel, hash.a, hash.d);
             var otherPrefab = PickPrefab(farmCollections, cell.farmLevel, hash.b, hash.d);
@@ -60,6 +63,15 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             position.y += instance.localScale.y * 0.5f;
             instance.localPosition = HexMetrics.Perturb(position);
             instance.localRotation = Quaternion.Euler(0f, 360f * hash.e, 0f);
+        }
+
+        public void AddSpecialFeature(HexCell cell, Vector3 position)
+        {
+            if (cell.specialIndex == 0) return; // shouldn't happen, but guard against it all the same.)
+            position = HexMetrics.Perturb(position);
+            var hash = HexMetrics.SampleHashGrid(position);
+            var rotation = Quaternion.Euler(0f, 360f * hash.e, 0f);
+            Instantiate(special[cell.specialIndex - 1], position, rotation, m_Container);
         }
 
         public void Apply()

@@ -86,7 +86,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
 
         bool CanAddFeatureToCenter(HexCell cell)
         {
-            return !cell.isUnderWater && !cell.hasRiver && !cell.HasRoads;
+            return !cell.hasRiver && !cell.HasRoads;
         }
 
         Vector2 GetRoadInterpolators(HexDirection dir, HexCell cell)
@@ -150,12 +150,13 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         void Triangulate(HexCell cell)
         {
             for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++)
-            {
                 Triangulate(d, cell);
-            }
-            if (CanAddFeatureToCenter(cell))
+            if (!cell.isUnderWater)
             {
-                features.AddFeature(cell, cell.position);
+                if (CanAddFeatureToCenter(cell))
+                    features.AddFeature(cell, cell.position);
+                if (cell.isSpecial)
+                    features.AddSpecialFeature(cell, cell.position);
             }
         }
 

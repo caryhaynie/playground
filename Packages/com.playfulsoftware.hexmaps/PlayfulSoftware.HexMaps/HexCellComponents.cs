@@ -30,11 +30,8 @@ namespace PlayfulSoftware.HexMaps
         [InternalBufferCapacity(6)]
         public struct NeighborElement : IBufferElementData
         {
-            public Entity Value;
-
-            public static implicit operator Entity(NeighborElement e) => e.Value;
-
-            public static implicit operator NeighborElement(Entity e) => new NeighborElement { Value = e};
+            public Entity Entity;
+            public HexDirection Direction;
         }
 
         public struct ParentHexChunk : ISharedComponentData
@@ -66,5 +63,7 @@ namespace PlayfulSoftware.HexMaps
 
         public int Elevation;
         public int WaterLevel;
+
+        public bool IsUnderWater => WaterLevel > Elevation;
     }
 }

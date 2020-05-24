@@ -124,6 +124,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
 
         [SerializeField] int m_FarmLevel;
         [SerializeField] int m_PlantLevel;
+        [SerializeField] int m_SpecialIndex;
         [SerializeField] int m_UrbanLevel;
         [SerializeField] bool m_Walled;
 
@@ -149,6 +150,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         public bool hasIncomingRiver => m_IncomingRiver.exists;
         public bool hasOutgoingRiver => m_OutgoingRiver.exists;
         public HexDirection incomingRiver => m_IncomingRiver.direction;
+        public bool isSpecial => m_SpecialIndex > 0;
         public bool isUnderWater => m_WaterLevel > m_Elevation;
         public HexDirection outgoingRiver => m_OutgoingRiver.direction;
 
@@ -156,9 +158,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         public bool hasRiverBeginOrEnd => hasIncomingRiver != hasOutgoingRiver;
 
         public Vector3 position => transform.localPosition;
-
         public HexDirection riverBeginOrEndDirection => hasIncomingRiver ? incomingRiver : outgoingRiver;
-
         public float riverSurfaceY => (elevation + HexMetrics.waterSurfaceElevationOffset) * HexMetrics.elevationStep;
         public float streamBedY => (elevation + HexMetrics.streamBedElevationOffset) * HexMetrics.elevationStep;
 
@@ -182,6 +182,19 @@ namespace PlayfulSoftware.HexMaps.Hybrid
                 if (m_PlantLevel == value)
                     return;
                 m_PlantLevel = value;
+                RefreshSelfOnly();
+            }
+        }
+
+        public int specialIndex
+        {
+            get => m_SpecialIndex;
+            set
+            {
+                if (m_SpecialIndex == value || hasRiver)
+                    return;
+                m_SpecialIndex = value;
+                RemoveRoads();
                 RefreshSelfOnly();
             }
         }
@@ -228,12 +241,16 @@ namespace PlayfulSoftware.HexMaps.Hybrid
 
         public void AddRoad(HexDirection dir)
         {
-            if (!m_Roads[(int) dir]
-                && !HasRiverThroughEdge(dir)
-                && GetElevationDifference(dir) <= 1)
-            {
+            if (CanAddRoad(dir))
                 SetRoad((int)dir, true);
-            }
+        }
+
+        bool CanAddRoad(HexDirection dir)
+        {
+            if (m_Roads[(int) dir]) return false;
+            if (HasRiverThroughEdge(dir)) return false;
+            if (GetElevationDifference(dir) > 1) return false;
+            return !isSpecial && !GetNeighbor(dir).isSpecial;
         }
 
         public HexEdgeType GetEdgeType(HexCell otherCell)
@@ -409,6 +426,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             // actually update the river state now, and refresh.
             m_OutgoingRiver.exists = true;
             m_OutgoingRiver.direction = dir;
+            m_SpecialIndex = 0;
 
             // update our neighbor too.
             if (!neighbor)
@@ -416,6 +434,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             neighbor.RemoveIncomingRiver();
             neighbor.m_IncomingRiver.exists = true;
             neighbor.m_IncomingRiver.direction = dir.Opposite();
+            neighbor.m_SpecialIndex = 0;
 
             SetRoad((int)dir, false);
         }
