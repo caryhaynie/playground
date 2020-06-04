@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace PlayfulSoftware.HexMaps.Hybrid
+namespace PlayfulSoftware.Meshes.Hybrid
 {
     static class EnumerableExtensions
     {

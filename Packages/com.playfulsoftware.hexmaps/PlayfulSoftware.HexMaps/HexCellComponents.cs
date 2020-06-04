@@ -2,6 +2,11 @@ using Unity.Entities;
 
 namespace PlayfulSoftware.HexMaps
 {
+    // Hex Cells
+    // -- Elevation
+    // -- Water Level
+    // -- Coordinates
+    // -- Neighbors
     public struct HexCell : IComponentData
     {
         public struct Coordinates : IComponentData
@@ -34,7 +39,7 @@ namespace PlayfulSoftware.HexMaps
             public HexDirection Direction;
         }
 
-        public struct ParentHexChunk : ISharedComponentData
+        public struct ParentChunk : ISharedComponentData
         {
             public Entity Value;
         }
@@ -66,4 +71,6 @@ namespace PlayfulSoftware.HexMaps
 
         public bool IsUnderWater => WaterLevel > Elevation;
     }
+
+
 }

@@ -215,42 +215,6 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             m_HexGrid.ShowUI(visible);
         }
 
-        public void Load()
-        {
-            var path = Path.Combine(DefaultMapPath(), "test.map");
-            using (var reader = new BinaryReader(File.OpenRead(path)))
-            {
-                int header = reader.ReadInt32();
-                if (header == 0)
-                    hexGrid.Load(reader);
-                else
-                    Debug.LogWarning($"Unknown map format {header}");
-            }
-        }
-
-        public void Save()
-        {
-            //DebugHelper.LogNoStacktrace(DefaultMapPath());
-            var path = Path.Combine(DefaultMapPath(), "test.map");
-            using (var writer = new BinaryWriter(File.Open(path, FileMode.Create)))
-            {
-                writer.Write(0);
-                hexGrid.Save(writer);
-            }
-        }
-
-        string DefaultMapPath()
-        {
-#if UNITY_EDITOR
-            const string kPath = "Assets/GameData/Maps";
-            if (!Directory.Exists(kPath))
-                Directory.CreateDirectory(kPath);
-            return kPath;
-#else
-            return Application.persistentDataPath;
-#endif // UNITY_EDITOR
-        }
-
         void Update()
         {
             var isClick = Input.GetMouseButton(0);
