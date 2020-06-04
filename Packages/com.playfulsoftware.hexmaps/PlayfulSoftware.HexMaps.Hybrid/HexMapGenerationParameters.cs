@@ -171,7 +171,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
 #if UNITY_EDITOR
         internal void OnValidate()
         {
-            m_Corners = HexMapUtility.CalculateCorners(outerRadius);
+            m_Corners = CalculateCorners(innerRadius, outerRadius);
         }
 
         void Reset()

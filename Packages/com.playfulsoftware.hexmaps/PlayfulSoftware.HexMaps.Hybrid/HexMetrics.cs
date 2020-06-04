@@ -234,8 +234,8 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             }
         }
 
-        public const float innerToOuter = HexMapGenerationParameters.innerToOuter;
-        public const float outerToInner = HexMapGenerationParameters.outerToInner;
+        public const float innerToOuter = HexMapConstants.innerToOuter;
+        public const float outerToInner = HexMapConstants.outerToInner;
 
 
         public static Vector3 GetBridge(HexDirection d)

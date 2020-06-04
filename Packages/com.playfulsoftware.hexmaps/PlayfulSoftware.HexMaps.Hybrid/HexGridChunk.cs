@@ -20,7 +20,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         [SerializeField]
         private Canvas m_GridCanvas;
 
-        public ChunkMeshData meshData;
+        //public ChunkMeshData meshData;
 
         public HexMesh estuaries;
         public HexMesh rivers;
@@ -476,15 +476,6 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             terrain.AddTriangleColor(color);
         }
 
-        void TriangulateEdgeFan(Vector3 center, EdgeVertexList edge, Color color)
-        {
-            foreach (var pairs in edge.pairs)
-            {
-                terrain.AddTriangle(center, pairs.Item1, pairs.Item2);
-                terrain.AddTriangleColor(color);
-            }
-        }
-
         void TriangulateEdgeStrip(EdgeVertices e1, Color c1, EdgeVertices e2, Color c2, bool hasRoad = false)
         {
             terrain.AddQuad(e1.v1, e1.v2, e2.v1, e2.v2);
@@ -498,23 +489,6 @@ namespace PlayfulSoftware.HexMaps.Hybrid
 
             if (hasRoad)
                 TriangulateRoadSegment(e1.v2, e1.v3, e1.v4, e2.v2, e2.v3, e2.v4);
-        }
-
-        void TriangulateEdgeStrip(EdgeVertexList e1, Color c1, EdgeVertexList e2, Color c2)
-        {
-            using (var p1 = e1.pairs.GetEnumerator())
-            using (var p2 = e2.pairs.GetEnumerator())
-            {
-                if (!(p1.MoveNext() && p2.MoveNext()))
-                    return;
-
-                do {
-                    var it1 = p1.Current;
-                    var it2 = p2.Current;
-                    terrain.AddQuad(it1.Item1, it1.Item2, it2.Item1, it2.Item2);
-                    terrain.AddQuadColor(c1, c2);
-                } while (p1.MoveNext() && p2.MoveNext());
-            }
         }
 
         void TriangulateEdgeTerraces(

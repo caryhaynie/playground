@@ -75,13 +75,13 @@ namespace PlayfulSoftware.HexMaps.Hybrid
     [ExecuteAlways]
     public sealed class HexGrid : MonoBehaviour
     {
-        [HideInInspector,SerializeField]
+        [SerializeField]
         private int m_CellCountX;
-        [HideInInspector,SerializeField]
+        [SerializeField]
         private int m_CellCountZ;
-        [SerializeField]
+        [HideInInspector,SerializeField]
         private int m_ChunkCountX;
-        [SerializeField]
+        [HideInInspector, SerializeField]
         private int m_ChunkCountZ;
         [SerializeField]
         private HexCell m_CellPrefab;
@@ -101,18 +101,20 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         [HideInInspector,SerializeField]
         private HexGridChunk[] m_Chunks;
 
-        private int cellCountX => m_CellCountX;
-        private int cellCountZ => m_CellCountZ;
-        public int chunkCountX
+        public int cellCountX
         {
-            get => m_ChunkCountX;
+            get => m_CellCountX;
             set => m_CellCountX = value;
         }
-        public int chunkCountZ
+
+        public int cellCountZ
         {
-            get => m_ChunkCountZ;
-            set => m_ChunkCountZ = value;
+            get => m_CellCountZ;
+            set => m_CellCountZ = value;
         }
+        private int chunkCountX => m_ChunkCountX;
+        private int chunkCountZ => m_ChunkCountZ;
+
         public HexCell cellPrefab => m_CellPrefab;
         public Text cellLabelPrefab => m_CellLabelPrefab;
         public HexGridChunk chunkPrefab => m_ChunkPrefab;
@@ -135,7 +137,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         {
             SetParameters(forceOverride: true);
 
-            RebuildGrid();
+            CreateMap(cellCountX, cellCountZ);
         }
 
         void AddCellToChunk(int x, int z, HexCell cell)
@@ -235,8 +237,8 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             if (gridExists && !forceRebuild)
                 return;
             RemoveExistingChunks();
-            m_CellCountX = m_ChunkCountX * HexMetrics.chunkSizeX;
-            m_CellCountZ = m_ChunkCountZ * HexMetrics.chunkSizeZ;
+            m_ChunkCountX = cellCountX / HexMetrics.chunkSizeX;
+            m_ChunkCountZ = cellCountZ / HexMetrics.chunkSizeZ;
 
             CreateChunks();
             CreateCells();
@@ -329,8 +331,20 @@ namespace PlayfulSoftware.HexMaps.Hybrid
                 chunk.ShowUI(visible);
         }
 
-        public void Load(BinaryReader reader)
+        public void Load(BinaryReader reader, int header)
         {
+            int x = 20, z = 15;
+
+            if (header >= 1)
+            {
+                x = reader.ReadInt32();
+                z = reader.ReadInt32();
+            }
+
+            if (x != cellCountX || z != cellCountZ)
+                if (!CreateMap(x, z))
+                    return;
+
             foreach (var cell in m_Cells)
                 cell.Load(reader);
 
@@ -342,6 +356,30 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         {
             foreach (var cell in m_Cells)
                 cell.Save(writer);
+        }
+
+        public bool CreateMap(int x, int z)
+        {
+            bool isValid = true;
+            if (x <= 0 || x % HexMetrics.chunkSizeX != 0)
+            {
+                Debug.LogError("Unsupported Map Width");
+                isValid = false;
+            }
+
+            if (isValid && z <= 0 || z % HexMetrics.chunkSizeZ != 0)
+            {
+                Debug.LogError("Unsupported Map Height");
+                isValid = false;
+            }
+
+            if (!isValid)
+                return false;
+
+            m_CellCountX = x;
+            m_CellCountZ = z;
+            RebuildGrid();
+            return true;
         }
     }
 }
