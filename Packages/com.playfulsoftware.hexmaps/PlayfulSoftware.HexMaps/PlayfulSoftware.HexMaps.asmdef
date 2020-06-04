@@ -7,6 +7,8 @@
     "Unity.Entities",
     "Unity.Jobs",
     "Unity.Mathematics",
+    "Unity.Properties",
+    "Unity.Serialization",
     "Unity.Transforms"
   ]
 }

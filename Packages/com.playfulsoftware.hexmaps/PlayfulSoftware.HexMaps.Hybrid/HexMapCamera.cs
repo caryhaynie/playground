@@ -93,12 +93,10 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         {
             if (!grid)
                 return position;
-            var xMax = (grid.chunkCountX *
-                       HexMetrics.chunkSizeX - 0.5f) *
+            var xMax = (grid.cellCountX - 0.5f) *
                        (2f * HexMetrics.innerRadius);
             position.x = Mathf.Clamp(position.x, 0, xMax);
-            var zMax = (grid.chunkCountZ *
-                       HexMetrics.chunkSizeZ -1f) *
+            var zMax = (grid.cellCountZ - 1f) *
                        (1.5f * HexMetrics.outerRadius);
             position.z = Mathf.Clamp(position.z, 0, zMax);
             return position;
@@ -112,5 +110,9 @@ namespace PlayfulSoftware.HexMaps.Hybrid
                 return value - max;
             return value;
         }
+
+        public void Lock() => enabled = false;
+        public void Unlock() => enabled = true;
+        public void ValidatePosition() => AdjustPosition(0f, 0f);
     }
 }

@@ -1,13 +1,11 @@
 {
     "name": "PlayfulSoftware.HexMaps.Hybrid",
-    "references": [],
-    "includePlatforms": [],
-    "excludePlatforms": [],
-    "allowUnsafeCode": false,
-    "overrideReferences": false,
-    "precompiledReferences": [],
-    "autoReferenced": true,
-    "defineConstraints": [],
-    "versionDefines": [],
-    "noEngineReferences": false
+    "references": [
+        "PlayfulSoftware.HexMaps",
+        "Unity.Entities",
+        "Unity.Entities.Hybrid",
+        "Unity.Transforms",
+        "Unity.Properties",
+        "Unity.Serialization"
+    ]
 }

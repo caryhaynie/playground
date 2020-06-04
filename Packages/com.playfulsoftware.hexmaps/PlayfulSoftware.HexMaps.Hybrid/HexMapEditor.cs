@@ -41,6 +41,8 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         #region Serialized Fields
         [SerializeField]
         HexGrid m_HexGrid;
+        [SerializeField]
+        HexMapCamera m_Camera;
         #endregion
 
         public HexGrid hexGrid
@@ -221,8 +223,12 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             using (var reader = new BinaryReader(File.OpenRead(path)))
             {
                 int header = reader.ReadInt32();
-                if (header == 0)
-                    hexGrid.Load(reader);
+                if (header <= 1)
+                {
+                    hexGrid.Load(reader, header);
+                    if (m_Camera)
+                        m_Camera.ValidatePosition();
+                }
                 else
                     Debug.LogWarning($"Unknown map format {header}");
             }
@@ -234,7 +240,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             var path = Path.Combine(DefaultMapPath(), "test.map");
             using (var writer = new BinaryWriter(File.Open(path, FileMode.Create)))
             {
-                writer.Write(0);
+                writer.Write(1);
                 hexGrid.Save(writer);
             }
         }

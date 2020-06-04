@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 using UnityEngine;
 
-namespace PlayfulSoftware.HexMaps.Hybrid
+namespace PlayfulSoftware.Meshes.Hybrid
 {
     public struct EdgeVertexList
     {
@@ -11,24 +11,9 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         public Vector3 lastCorner { get; set; }
         public uint subdivisions { get; set; }
 
-        private uint sectionCount { get { return subdivisions + 1; } }
+        private uint sectionCount => subdivisions + 1;
 
         public IEnumerable<Tuple<Vector3, Vector3>> pairs => vertices.Pairwise();
-
-        public IEnumerable<Tuple<Vector3, Vector3>> terracedPairs => terracedVertices.Pairwise();
-
-        public IEnumerable<Vector3> terracedVertices
-        {
-            get
-            {
-                yield return firstCorner;
-                for (int i = 0; i < HexMetrics.terracedSteps; i++)
-                {
-                    yield return HexMetrics.TerraceLerp(firstCorner, lastCorner, i);
-                }
-                yield return lastCorner;
-            }
-        }
 
         public IEnumerable<Vector3> vertices
         {
@@ -55,17 +40,6 @@ namespace PlayfulSoftware.HexMaps.Hybrid
                 }
                 yield break;
             }
-        }
-
-        public EdgeVertices ToEdgeVertices() => new EdgeVertices(firstCorner, lastCorner);
-
-        public static EdgeVertexList TerraceLerp(
-            EdgeVertexList a, EdgeVertexList b, int step)
-        {
-            return new EdgeVertexList {
-                firstCorner = HexMetrics.TerraceLerp(a.firstCorner, b.firstCorner, step),
-                lastCorner = HexMetrics.TerraceLerp(a.lastCorner, b.lastCorner, step)
-            };
         }
     }
 }

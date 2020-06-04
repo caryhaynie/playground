@@ -116,10 +116,6 @@ namespace PlayfulSoftware.HexMaps.Hybrid
     [CreateAssetMenu(fileName = "MapParameters", menuName = "Hex Maps/Map Parameters", order = 8)]
     public sealed class HexMapGenerationParameters : ScriptableObject
     {
-        // These ratios are intrinsic to hexmaps, so they can't be changed.
-        public const float outerToInner = 0.866025404f;
-        public const float innerToOuter = 1f / outerToInner;
-
         public float bridgeDesignLength = 7f;
         [Tooltip("Constant scale factor applied to random values sampled from noise texture")]
         public float cellPerturbStrength = 4f;
@@ -154,7 +150,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
 
         public float blendFactor => 1f - solidFactor;
         public float horizontalTerraceStepSize => 1f / terracedSteps;
-        public float innerRadius => outerRadius * outerToInner; // sqrt(3) / 2
+        public float innerRadius => outerRadius * HexMapConstants.outerToInner; // sqrt(3) / 2
         public int terracedSteps => terracesPerSlope * 2 + 1;
         public float verticalTerraceStepSize => 1f / (terracesPerSlope + 1);
         public float wallElevationOffset => verticalTerraceStepSize;
@@ -175,7 +171,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
 #if UNITY_EDITOR
         internal void OnValidate()
         {
-            m_Corners = CalculateCorners(innerRadius, outerRadius);
+            m_Corners = HexMapUtility.CalculateCorners(outerRadius);
         }
 
         void Reset()
