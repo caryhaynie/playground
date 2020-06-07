@@ -461,7 +461,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e7a2ae68958394b309b61c2acffa92fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Options: 3
+  m_Options: 19
   m_HexMesh: {fileID: 0}
   m_MeshCollider: {fileID: 9160268868329415780}
   LogMeshStatsOnAwake: 0
@@ -926,7 +926,6 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   m_GridCanvas: {fileID: 3771038426563679514}
-  meshData: {fileID: 0}
   estuaries: {fileID: 5652424110310760650}
   rivers: {fileID: 1844887016729533253}
   roads: {fileID: 6408078222187878564}

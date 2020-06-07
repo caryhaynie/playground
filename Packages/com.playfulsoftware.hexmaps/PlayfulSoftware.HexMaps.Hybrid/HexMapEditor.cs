@@ -95,6 +95,8 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         {
             if (!cell)
                 return;
+            if (m_ActiveTerrainTypeIndex >= 0)
+                cell.terrainTypeIndex = m_ActiveTerrainTypeIndex;
             if (m_Elevation.enabled)
                 cell.elevation = m_Elevation.level;
             if (m_FarmLevel.enabled)

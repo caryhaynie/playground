@@ -21,6 +21,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         public bool useColors => m_Options.HasFlag(MeshUsageOptions.Colors);
         public bool useUVCoordinates => m_Options.HasFlag(MeshUsageOptions.UV);
         public bool useUV2Coordinates => m_Options.HasFlag(MeshUsageOptions.UV2);
+        public bool useTerrainTypes => m_Options.HasFlag(MeshUsageOptions.TerrainType);
 
         [HideInInspector,SerializeField]
         Mesh m_HexMesh;
@@ -32,6 +33,7 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         [NonSerialized] private List<Color> m_Colors;
         [NonSerialized] private List<Vector2> m_UVs;
         [NonSerialized] private List<Vector2> m_UV2s;
+        [NonSerialized] private List<Vector3> m_TerrainTypes;
 
         public bool LogMeshStatsOnAwake;
 
@@ -83,6 +85,13 @@ namespace PlayfulSoftware.HexMaps.Hybrid
                 m_HexMesh.SetUVs(1, m_UV2s);
                 ListPool<Vector2>.Add(m_UV2s);
             }
+
+            if (useTerrainTypes)
+            {
+                m_HexMesh.SetUVs(2, m_TerrainTypes);
+                ListPool<Vector3>.Add(m_TerrainTypes);
+            }
+
             m_HexMesh.SetTriangles(m_Triangles, 0);
             ListPool<int>.Add(m_Triangles);
             m_HexMesh.RecalculateNormals();
@@ -109,6 +118,8 @@ namespace PlayfulSoftware.HexMaps.Hybrid
                 m_UVs = ListPool<Vector2>.Get();
             if (useUV2Coordinates)
                 m_UV2s = ListPool<Vector2>.Get();
+            if (useTerrainTypes)
+                m_TerrainTypes = ListPool<Vector3>.Get();
         }
 
         public void AddQuad(Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4)
@@ -159,6 +170,25 @@ namespace PlayfulSoftware.HexMaps.Hybrid
             m_Colors.Add(c2);
             m_Colors.Add(c3);
             m_Colors.Add(c4);
+        }
+
+        public void AddTriangleTerrainTypes(Vector3 types)
+        {
+            if (!useTerrainTypes)
+                return;
+            m_TerrainTypes.Add(types);
+            m_TerrainTypes.Add(types);
+            m_TerrainTypes.Add(types);
+        }
+
+        public void AddQuadTerrainTypes(Vector3 types)
+        {
+            if (!useTerrainTypes)
+                return;
+            m_TerrainTypes.Add(types);
+            m_TerrainTypes.Add(types);
+            m_TerrainTypes.Add(types);
+            m_TerrainTypes.Add(types);
         }
 
         public void AddTriangle(Vector3 v1, Vector3 v2, Vector3 v3)

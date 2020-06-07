@@ -147,11 +147,6 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         [SerializeField] int m_UrbanLevel;
         [SerializeField] bool m_Walled;
 
-        public Color color
-        {
-            get => HexMetrics.GetTerrainColor(m_TerrainTypeIndex);
-        }
-
         public int elevation
         {
             get => m_Elevation;

@@ -13,6 +13,8 @@ namespace PlayfulSoftware.HexMaps.Hybrid
         UV = 1 << 2,
         [InspectorName("UV2 Coordinates")]
         UV2 = 1 << 3,
+        [InspectorName("Terrain Type")]
+        TerrainType = 1 << 4
     }
 
     public static class MeshUsageOptionsExtensions
